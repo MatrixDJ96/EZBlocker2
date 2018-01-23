@@ -65,7 +65,7 @@ namespace EZBlocker2
                         StringComparison comp = StringComparison.OrdinalIgnoreCase;
 
                         startInfo.Arguments = $"l \"{updateFullFile}\"";
-                        List<string> lines = new List<string>((string[])StartProcess(startInfo, true));
+                        List<string> lines = new List<string>(StartProcess(startInfo, true));
 
                         string line = lines.Find(x => x.IndexOf("ezblocker", comp) > -1 && x.Substring(x.Length - 4).Equals(".exe", comp));
 
@@ -79,7 +79,7 @@ namespace EZBlocker2
                         DeleteFile(Application.StartupPath + $@"\{entry}");
 
                         startInfo.Arguments = $"e \"{updateFullFile}\" \"{entry}\"";
-                        List<string> lines = new List<string>((string[])StartProcess(startInfo, true));
+                        List<string> lines = new List<string>(StartProcess(startInfo, true));
 
                         if (lines.Find(x => x.ToLower().Contains("error")) == null)
                             success = true;

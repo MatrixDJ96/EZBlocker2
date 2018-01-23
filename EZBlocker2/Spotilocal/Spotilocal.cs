@@ -15,7 +15,7 @@ namespace EZBlocker2
         private static readonly string open_spotify = "https://open.spotify.com";
         private static readonly string host = "http://127.0.0.1";
         private static readonly int timeout = 2000;
-        private static int port = 0;
+        private static int port = 0; // to initialize with GetPort()
 
         private static string oauth;
         private static string csrf;
@@ -26,10 +26,12 @@ namespace EZBlocker2
         public static bool GetPort()
         {
             WebRequest request;
-            int timeout = Spotilocal.timeout / 100;
+            int timeout = 20;
 
             int port = 4370; // default port
-            while (port < 4391)
+            int f_port = 4390; // final port
+
+            while (port <= f_port)
             {
                 try
                 {
@@ -37,40 +39,22 @@ namespace EZBlocker2
                     request.Timeout = timeout;
                     request.GetResponse().Close();
                 }
-                catch (Exception ex)
+                catch (WebException ex)
                 {
-                    if (ex.Message.Contains("404"))
+                    if (ex.Status == WebExceptionStatus.ProtocolError)
                         break;
                     else
                         port++;
                 }
             }
-            if (port < 4391)
+
+            if (port <= f_port)
             {
                 Spotilocal.port = port;
                 return true;
             }
             else
                 return false;
-        }
-
-        private static string GetOAuth()
-        {
-            WebRequest request = WebRequest.Create(open_spotify + "/token");
-            ((HttpWebRequest)request).UserAgent = user_agent;
-            request.Timeout = timeout;
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
-            string json = reader.ReadToEnd();
-
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-
-            oauth = JsonConvert.DeserializeObject<OAuthToken>(json).T;
-            return oauth;
         }
 
         private static string GetCSRF()
@@ -94,6 +78,26 @@ namespace EZBlocker2
 
             csrf = JsonConvert.DeserializeObject<CsrfToken>(json).Token;
             return csrf;
+        }
+
+        private static string GetOAuth()
+        {
+            WebRequest request = WebRequest.Create(open_spotify + "/token");
+            ((HttpWebRequest)request).UserAgent = user_agent;
+            request.Timeout = timeout;
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            Stream dataStream = response.GetResponseStream();
+            StreamReader reader = new StreamReader(dataStream);
+            string json = reader.ReadToEnd();
+
+            reader.Close();
+            dataStream.Close();
+            response.Close();
+
+            oauth = JsonConvert.DeserializeObject<OAuthToken>(json).T;
+            return oauth;
         }
 
         public static SpotilocalStatus GetStatus()

@@ -49,7 +49,7 @@ namespace EZBlocker2
             }
         }
 
-        public static object StartProcess(ProcessStartInfo startInfo, bool output = false)
+        public static string[] StartProcess(ProcessStartInfo startInfo, bool output = false)
         {
             using (var process = new Process())
             {
