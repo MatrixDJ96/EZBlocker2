@@ -24,6 +24,7 @@ namespace EZBlocker2
 
         // Windows files
         private readonly string sndVolFullExe = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\System32\SndVol.exe";
+        private readonly string sndVol32FullExe = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\System32\SndVol32.exe";
         private readonly string hostsFullFile = Environment.GetFolderPath(Environment.SpecialFolder.Windows) + @"\System32\drivers\etc\hosts";
 
         // Classic Spotify files
@@ -45,9 +46,10 @@ namespace EZBlocker2
             "gads.pubmatic.com",
             "pubads.g.doubleclisck.net",
             "securepubads.g.doubleclick.net",
+            "spclient.wg.spotify.com",
             "www.googletagservices.com"
         };
-
+        
         // Form movement
         private bool dragging = false;
         private Point dragCursorPoint;
@@ -66,7 +68,7 @@ namespace EZBlocker2
         private int countdown = 30;
 
         // Label message
-        private string[] stringMessage; // useful to store info
+        private string[] message; // useful to store info
 
         /* Constructor */
         public MainForm()
@@ -251,7 +253,7 @@ namespace EZBlocker2
                                 checkBoxBlockAds.Checked = true;
 
                             Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
-                            // not save settings !!!
+                            // do not save settings !!!
 
                             return true;
                         }
@@ -452,11 +454,14 @@ namespace EZBlocker2
 
         private void TimerMain_Tick(object sender, EventArgs e)
         {
+            timerMain.Enabled = false; // wait...
             timerMain.Interval = 700;
 
+            bool enable = true; // start?
+            message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
+
             SpotilocalStatus status = Spotilocal.GetStatus();
-            stringMessage = new string[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
-            if (status.IsError)
+            if (!status.IsError)
             {
                 if (status.IsPrivateSession)
                     ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
@@ -485,12 +490,15 @@ namespace EZBlocker2
                     ShowMessage("Error while hooking to Spotify...", "Error: " + status.Error.Message);
                 else
                 {
-                    timerMain.Enabled = false;
+                    enable = false; // stop!
                     MinimizeEZBlocker();
                     notifyIcon.ShowBalloonTip(5000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
                     CloseEZBlocker(5000);
                 }
             }
+
+            if (enable)
+                timerMain.Enabled = true; // go!
         }
 
         private void MainForm_MouseDown(object sender, MouseEventArgs e)
@@ -526,14 +534,12 @@ namespace EZBlocker2
             UInt32 y = (UInt16)(((UInt32)(pos.Y)) & 0xffff);
             Int64 l = (x | y << 16);
 
-            try
-            {
+            if (File.Exists(sndVolFullExe))
                 StartProcess(sndVolFullExe, "-m " + l.ToString());
-            }
-            catch
-            {
-                MessageBox.Show("Could not open system volume mixer.\r\nThis is only available on Windows 7/8/10", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            else if (File.Exists(sndVol32FullExe))
+                StartProcess(sndVol32FullExe, "-m " + l.ToString());
+            else
+                MessageBox.Show("Could not open system volume mixer.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void BtnSndVol_MouseLeave(object sender, EventArgs e) => btnSndVol.BackgroundImage = Properties.Resources.SndVol_Leave;
