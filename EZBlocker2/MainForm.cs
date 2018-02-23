@@ -49,7 +49,7 @@ namespace EZBlocker2
             "spclient.wg.spotify.com",
             "www.googletagservices.com"
         };
-        
+
         // Form movement
         private bool dragging = false;
         private Point dragCursorPoint;
@@ -313,11 +313,11 @@ namespace EZBlocker2
             return true;
         }
 
-        /* Function executed by events */
+        /* Functions executed by events */
         private void Main_Load(object sender, EventArgs e)
         {
             // Check Spotify version (classic or Windows Store)
-            if (!File.Exists(spotifyPrefsFullFile) && !File.Exists(spotifyFullExe))
+            if (!File.Exists(spotifyFullExe))
             {
                 if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Packages")) // Windows 8+
                 {
@@ -487,7 +487,7 @@ namespace EZBlocker2
             else
             {
                 if (IsSpotifyRunning())
-                    ShowMessage("Error while hooking to Spotify...", "Error: " + status.Error.Message);
+                    ShowMessage("Error: " + status.Error.Message);
                 else
                 {
                     enable = false; // stop!
@@ -577,7 +577,6 @@ namespace EZBlocker2
             try
             {
                 Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
-                Properties.Settings.Default.Save();
 
                 if (!BlockAds())
                 {
@@ -586,6 +585,8 @@ namespace EZBlocker2
                     checkBoxBlockAds.Checked = Properties.Settings.Default.BlockAds;
                     checkBoxBlockAds.CheckedChanged += new EventHandler(CheckBoxBlockAds_CheckedChanged);
                 }
+                else
+                    Properties.Settings.Default.Save();            
             }
             catch
             {
@@ -601,7 +602,6 @@ namespace EZBlocker2
             try
             {
                 Properties.Settings.Default.StartOnLogin = checkBoxStartOnLogin.Checked;
-                Properties.Settings.Default.Save();
 
                 if (checkBoxStartOnLogin.Checked)
                 {
@@ -616,6 +616,8 @@ namespace EZBlocker2
                     checkBoxStartMinimized.CheckedChanged += new EventHandler(CheckBoxStartMinimized_CheckedChanged);
                 }
                 StartOnLogin();
+
+                Properties.Settings.Default.Save();
             }
             catch
             {
