@@ -51,6 +51,15 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a pr
 
 ### Changelog
 
+Version 2.0.0.7:
+- Added SndVol32.exe check for system volume mixer
+- Improved songs detection
+- Updated 7-Zip binary
+- Improved errors reporting
+- Updated host patches
+- Improved host patches applying process
+- Fixed minor bugs
+
 Version 2.0.0.6:
 - Downgraded .NET Framework to v4.0
 - Improved Spotify detection process
