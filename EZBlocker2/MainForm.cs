@@ -42,12 +42,66 @@ namespace EZBlocker2
 
         // Hosts patches
         private readonly string[] hostsPatches = {
-            "ads.pubmatic.com",
-            "gads.pubmatic.com",
-            "pubads.g.doubleclisck.net",
+            "googleads4.g.doubleclick.net",
+            "googleadapis.l.google.com",
+            "adclick.g.doublecklick.net",
+            "adeventtracker.spotify.com",
+            "ads-fa.spotify.com",
+            "adnxs.com",
+            "adnxs.comadplexmedia.adk2x.com",
+            "apresolve.spotify.com",
+            "analytics.spotify.com",
+            "audio-sp-sto.spotify.com",
+            "audio2.spotify.com",
+            "b.scorecardresearch.com",
+            "bounceexchange.com",
+            "bs.serving-sys.com",
+            "googleadapis.l.google.com",
+            "content.bitsontherun.com",
+            "cs126.wpc.edgecastcdn.net",
+            "core.insightexpressai.com",
+            "crashdump.spotify.com",
+            "d2gi7ultltnc2u.cloudfront.net",
+            "d3rt1990lpmkn.cloudfront.net",
+            "desktop.spotify.com",
+            "doubleclick.net",
+            "ds.serving-sys.com",
+            "gew1.ap.spotify.com",
+            "googleadservices.com",
+            "googleads.g.doubleclick.net",
+            "gtssl2-ocsp.geotrust.com",
+            "js.moatads.com",
+            "log.spotify.com",
+            "lon6-accesspoint-a33.lon6.spotify.com",
+            "media-match.com",
+            "omaze.com",
+            "pagead46.l.doubleclick.net",
+            "pagead2.googlesyndication.com",
+            "partner.googleadservices.com",
+            "pubads.g.doubleclick.net",
+            "redirector.gvt1.com",
+            "s0.2mdn.net",
             "securepubads.g.doubleclick.net",
             "spclient.wg.spotify.com",
-            "www.googletagservices.com"
+            "server-54-230-216-203.mrs50.r.cloudfront.net",
+            "seen-on-screen.thewhizmarketing.com",
+            "tpc.googlesyndication.com",
+            "u.scdn.co",
+            "upgrade.scdn.co",
+            "upgrade.spotify.com",
+            "v.jwpcdn.com",
+            "video-ad-stats.googlesyndication.com",
+            "weblb-wg.gslb.spotify.com",
+            "www.googleadservices.com",
+            "www.googletagservices.com",
+            "www.omaze.com"
+        };
+
+        private readonly string[] oldHostsPatches =
+        {
+            "ads.pubmatic.com",
+            "gads.pubmatic.com",
+            "pubads.g.doubleclisck.net"
         };
 
         // Form movement
@@ -78,7 +132,11 @@ namespace EZBlocker2
             contextMenuStrip.Renderer = new CustomToolStripRenderer();
             titleLabel.Text = "v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             if (IsAdmin)
+            {
                 titleLabel.Text += " - Admin mode";
+                string checkBoxBlockAdsToolTip = toolTip.GetToolTip(checkBoxBlockAds);
+                toolTip.SetToolTip(checkBoxBlockAds, checkBoxBlockAdsToolTip.Substring(0, checkBoxBlockAdsToolTip.IndexOf('(') - 1));
+            }
             labelMessage.UseMnemonic = false; // display the ampersand character
 
             if (Properties.Settings.Default.StartOnLogin || Properties.Settings.Default.StartMinimized)
@@ -213,76 +271,98 @@ namespace EZBlocker2
             }
         }
 
-        private bool BlockAds(bool loading = false, bool write = false, string[] currentLines = null, List<string> newLines = null)
+        private bool BlockAds(bool loading = false)
         {
+            bool fix = false;
+            bool write = false;
+
             try
             {
-                if (currentLines == null || newLines == null)
+                string address = "0.0.0.0";
+
+                string[] currentLines = File.ReadAllLines(hostsFullFile);
+                List<string> tmpLines = new List<string>(currentLines);
+                List<string> newLines = new List<string>();
+
+                foreach (string line in currentLines)
                 {
-                    string address = "0.0.0.0";
-                    List<string> patches = new List<string>(hostsPatches);
-
-                    currentLines = File.ReadAllLines(hostsFullFile);
-                    newLines = new List<string>(currentLines);
-
-                    foreach (string line in currentLines)
+                    // fix wrong patches
+                    foreach (string patch in hostsPatches)
                     {
-                        foreach (string patch in hostsPatches)
+                        // check with space and tab to avoid conflit (for example 'pubads.g.doubleclick.net' and 'securepubads.g.doubleclick.net' or 'adnxs.com' and 'adnxs.comadplexmedia.adk2x.com')
+                        string tmp = line.ToLower().Replace("\t", "");
+                        while (tmp.Contains("  "))
+                            tmp = tmp.Replace("  ", " ");
+
+                        if (tmp.Contains(" " + patch) && tmp.EndsWith(patch))
                         {
-                            // check with space and tab to avoid conflit (for example 'pubads.g.doubleclick.net' and 'securepubads.g.doubleclick.net')
-                            if (line.Contains(" " + patch) || line.Contains("\t" + patch))
+                            if (!tmp.Replace(patch, "").Trim().Equals(address))
                             {
-                                if (!line.Replace(patch, "").Trim(new[] { ' ', '\t' }).Equals(address))
-                                {
-                                    newLines[newLines.IndexOf(line)] = address + " " + patch;
-                                    write = true;
-                                }
-                                else
-                                    patches.RemoveAt(patches.IndexOf(patch));
+                                tmpLines[tmpLines.IndexOf(line)] = address + " " + patch;
+                                fix = true;
                             }
                         }
                     }
 
-                    if (loading)
+                    // delete wrong patches
+                    foreach (string patch in oldHostsPatches)
                     {
-                        if (patches.Count == hostsPatches.Length || patches.Count == 0)
-                        {
-                            if (patches.Count == hostsPatches.Length)
-                                checkBoxBlockAds.Checked = false;
-                            else if (patches.Count == 0)
-                                checkBoxBlockAds.Checked = true;
+                        string tmp = line.ToLower().Replace("\t", "").Trim();
+                        while (tmp.Contains("  "))
+                            tmp = tmp.Replace("  ", " "); 
 
-                            Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
-                            // do not save settings !!!
-
-                            return true;
-                        }
-                    }
-
-                    if (checkBoxBlockAds.Checked)
-                    {
-                        foreach (string patch in patches)
+                        if (tmp.Contains(" " + patch) && tmp.EndsWith(patch))
                         {
-                            newLines.Add(address + " " + patch);
-                            write = true;
-                        }
-                    }
-                    else
-                    {
-                        foreach (string patch in hostsPatches)
-                        {
-                            int index = newLines.FindIndex(x => x.Contains(patch));
-                            if (index != -1)
+                            int index = tmpLines.FindIndex(x => x.ToLower().Contains(patch));
+                            while (index != -1)
                             {
-                                newLines.RemoveAt(index);
-                                write = true;
+                                tmpLines.RemoveAt(index);
+                                index = tmpLines.FindIndex(x => x.ToLower().Contains(patch));
+                                fix = true;
                             }
                         }
                     }
                 }
 
-                if (write)
+                // delete duplicated patches
+                foreach (string line in tmpLines)
+                {
+                    if (!newLines.Contains(line))
+                        newLines.Add(line);
+                    else
+                        fix = true;
+                }
+
+                if (checkBoxBlockAds.Checked)
+                {
+                    foreach (string patch in hostsPatches)
+                    {
+                        if (newLines.FindIndex(x => x.ToLower().Contains(patch)) == -1)
+                        {
+                            newLines.Add(address + " " + patch);
+                            write = true;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (string patch in hostsPatches)
+                    {
+                        int index = newLines.FindIndex(x => x.ToLower().Contains(patch));
+                        while (index != -1)
+                        {
+                            newLines.RemoveAt(index);
+                            index = newLines.FindIndex(x => x.ToLower().Contains(patch));
+                            write = true;
+                        }
+                    }
+                }
+
+                if (fix || write)
+                {
                     File.WriteAllLines(hostsFullFile, newLines);
+                    MessageBox.Show("Hosts file has been " + (fix ? "fixed" : "updated") + " successfully!", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             catch
             {
@@ -299,7 +379,7 @@ namespace EZBlocker2
                     if (File.GetAttributes(hostsFullFile).HasFlag(FileAttributes.ReadOnly))
                     {
                         File.SetAttributes(hostsFullFile, File.GetAttributes(hostsFullFile) & ~FileAttributes.ReadOnly); // remove flag
-                        BlockAds(loading, write, currentLines, newLines);
+                        BlockAds(loading);
                         File.SetAttributes(hostsFullFile, File.GetAttributes(hostsFullFile) | FileAttributes.ReadOnly); // add flag
                         return true;
                     }
@@ -586,7 +666,7 @@ namespace EZBlocker2
                     checkBoxBlockAds.CheckedChanged += new EventHandler(CheckBoxBlockAds_CheckedChanged);
                 }
                 else
-                    Properties.Settings.Default.Save();            
+                    Properties.Settings.Default.Save();
             }
             catch
             {
