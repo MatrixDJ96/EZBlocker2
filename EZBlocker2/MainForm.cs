@@ -111,6 +111,8 @@ namespace EZBlocker2
 
         // Spotify system volume
         private bool muted = false;
+        private int maxWait = 2;
+        private int wait = -1;
 
         // Useful booleans
         private bool winStoreApp = false;
@@ -119,7 +121,7 @@ namespace EZBlocker2
         private bool exiting = false;
 
         // Countdown timer
-        private int countdown = 30;
+        private int countdown = 30; // seconds
 
         // Label message
         private string[] message; // useful to store info
@@ -227,6 +229,18 @@ namespace EZBlocker2
         {
             if (muted == enable)
                 return;
+
+            if (wait == -1)
+            {
+                wait = maxWait - 1; // skip one
+            }
+            else if (wait > -1)
+            {
+                wait--;
+                return;
+            }
+            else
+                wait = maxWait;
 
             muted = enable;
 
@@ -551,7 +565,7 @@ namespace EZBlocker2
         private void TimerMain_Tick(object sender, EventArgs e)
         {
             timerMain.Enabled = false; // wait...
-            timerMain.Interval = 700;
+            timerMain.Interval = 500;
 
             bool enable = true; // start?
             message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
@@ -588,8 +602,8 @@ namespace EZBlocker2
                 {
                     enable = false; // stop!
                     MinimizeEZBlocker();
-                    notifyIcon.ShowBalloonTip(5000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                    CloseEZBlocker(5000);
+                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                    CloseEZBlocker(3000);
                 }
             }
 
