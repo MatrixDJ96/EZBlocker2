@@ -164,9 +164,8 @@ namespace EZBlocker2
                 else
                     Close();
             }
-            catch (Exception ex)
+            catch 
             {
-                // TODO -> check exception
                 DeleteFile(updateFullFile); // remove downloaded file
                 Close();
             }
