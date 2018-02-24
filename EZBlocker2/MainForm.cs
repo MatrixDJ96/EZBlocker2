@@ -139,7 +139,7 @@ namespace EZBlocker2
             }
             labelMessage.UseMnemonic = false; // display the ampersand character
 
-            if (Properties.Settings.Default.StartOnLogin || Properties.Settings.Default.StartMinimized)
+            if (Properties.Settings.Default.StartMinimized)
                 HideEZBlocker();
         }
 
@@ -484,10 +484,7 @@ namespace EZBlocker2
             checkBoxMuteAds.Checked = Properties.Settings.Default.MuteAds;
             checkBoxBlockAds.Checked = Properties.Settings.Default.BlockAds;
             checkBoxStartOnLogin.Checked = Properties.Settings.Default.StartOnLogin;
-            if (checkBoxStartOnLogin.Checked)
-                checkBoxStartMinimized.Checked = true;
-            else
-                checkBoxStartMinimized.Checked = Properties.Settings.Default.StartMinimized;
+            checkBoxStartMinimized.Checked = Properties.Settings.Default.StartMinimized;
 
             bool enableBlockAds = BlockAds(true);
             StartOnLogin();
@@ -495,14 +492,12 @@ namespace EZBlocker2
             checkBoxMuteAds.Enabled = true;
             checkBoxBlockAds.Enabled = enableBlockAds;
             checkBoxStartOnLogin.Enabled = true;
-            if (!checkBoxStartOnLogin.Checked)
-                checkBoxStartMinimized.Enabled = true;
+            checkBoxStartMinimized.Enabled = true;
 
             checkBoxMuteAds.CheckedChanged += new EventHandler(CheckBoxMuteAds_CheckedChanged);
             checkBoxBlockAds.CheckedChanged += new EventHandler(CheckBoxBlockAds_CheckedChanged);
             checkBoxStartOnLogin.CheckedChanged += new EventHandler(CheckBoxStartOnLogin_CheckedChanged);
-            if (checkBoxStartMinimized.Enabled)
-                checkBoxStartMinimized.CheckedChanged += new EventHandler(CheckBoxStartMinimized_CheckedChanged);
+            checkBoxStartMinimized.CheckedChanged += new EventHandler(CheckBoxStartMinimized_CheckedChanged);
 
             // Extract dependencies
             try
@@ -533,7 +528,7 @@ namespace EZBlocker2
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            if (Properties.Settings.Default.StartOnLogin || Properties.Settings.Default.StartMinimized)
+            if (Properties.Settings.Default.StartMinimized)
                 MinimizeEZBlocker();
         }
 
