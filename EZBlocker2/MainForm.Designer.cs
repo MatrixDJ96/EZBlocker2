@@ -174,7 +174,7 @@ namespace EZBlocker2
             this.checkBoxBlockAds.TabIndex = 6;
             this.checkBoxBlockAds.TabStop = false;
             this.checkBoxBlockAds.Text = "Block ads";
-            this.toolTip.SetToolTip(this.checkBoxBlockAds, "Apply hosts patches to block all ads (require admin privileges)");
+            this.toolTip.SetToolTip(this.checkBoxBlockAds, "Apply hosts patches to block all ads (could require admin privileges)");
             this.checkBoxBlockAds.UseVisualStyleBackColor = false;
             // 
             // checkBoxMuteAds

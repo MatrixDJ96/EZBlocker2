@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -19,6 +20,9 @@ namespace EZBlocker2
         // EZBlocker 2
         public static readonly string ezBlockerFullExe = Application.ExecutablePath.Replace("/", "\\");
         public static readonly string ezBlockerExe = Path.GetFileName(ezBlockerFullExe);
+
+        // StringComparison
+        public static StringComparison comp = StringComparison.OrdinalIgnoreCase;
 
         public static bool IsFirstInstance()
         {
@@ -144,6 +148,9 @@ namespace EZBlocker2
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+
+                ServicePointManager.SecurityProtocol |= SecurityProtocolTypeExtensions.Tls12; // fix connection to GitHub
+
                 Application.Run(new UpdateForm());
                 Application.Run(new MainForm());
             }

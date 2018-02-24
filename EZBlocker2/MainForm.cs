@@ -271,6 +271,14 @@ namespace EZBlocker2
             }
         }
 
+        private string MyTrim(string str)
+        {
+            string tmp = str.Replace("\t", "");
+            while (tmp.Contains("  "))
+                tmp = tmp.Replace("  ", " ");
+            return tmp;
+        }
+
         private bool BlockAds(bool loading = false)
         {
             bool fix = false;
@@ -286,20 +294,22 @@ namespace EZBlocker2
 
                 foreach (string line in currentLines)
                 {
+                    string tmp = MyTrim(line);
+
                     // fix wrong patches
                     foreach (string patch in hostsPatches)
                     {
                         // check with space and tab to avoid conflit (for example 'pubads.g.doubleclick.net' and 'securepubads.g.doubleclick.net' or 'adnxs.com' and 'adnxs.comadplexmedia.adk2x.com')
-                        string tmp = line.ToLower().Replace("\t", "");
-                        while (tmp.Contains("  "))
-                            tmp = tmp.Replace("  ", " ");
-
-                        if (tmp.Contains(" " + patch) && tmp.EndsWith(patch))
+                        if (tmp.ToLower().Contains(" " + patch) && tmp.EndsWith(patch, comp))
                         {
                             if (!tmp.Replace(patch, "").Trim().Equals(address))
                             {
-                                tmpLines[tmpLines.IndexOf(line)] = address + " " + patch;
-                                fix = true;
+                                int index = tmpLines.IndexOf(line);
+                                if (index > -1)
+                                {
+                                    tmpLines[index] = address + " " + patch;
+                                    fix = true;
+                                }
                             }
                         }
                     }
@@ -307,14 +317,10 @@ namespace EZBlocker2
                     // delete wrong patches
                     foreach (string patch in oldHostsPatches)
                     {
-                        string tmp = line.ToLower().Replace("\t", "").Trim();
-                        while (tmp.Contains("  "))
-                            tmp = tmp.Replace("  ", " "); 
-
-                        if (tmp.Contains(" " + patch) && tmp.EndsWith(patch))
+                        if (tmp.ToLower().Contains(" " + patch) && tmp.EndsWith(patch, comp))
                         {
                             int index = tmpLines.FindIndex(x => x.ToLower().Contains(patch));
-                            while (index != -1)
+                            while (index > -1)
                             {
                                 tmpLines.RemoveAt(index);
                                 index = tmpLines.FindIndex(x => x.ToLower().Contains(patch));
@@ -330,14 +336,26 @@ namespace EZBlocker2
                     if (!newLines.Contains(line))
                         newLines.Add(line);
                     else
-                        fix = true;
+                    {
+                        string tmp = MyTrim(line);
+                        foreach (string patch in hostsPatches)
+                        {
+                            if (!(tmp.ToLower().Contains(patch)) || tmp.Trim()[0] == '#')
+                            {
+                                newLines.Add(line);
+                                break;
+                            }
+                            else
+                                fix = true;
+                        }
+                    }
                 }
 
                 if (checkBoxBlockAds.Checked)
                 {
                     foreach (string patch in hostsPatches)
                     {
-                        if (newLines.FindIndex(x => x.ToLower().Contains(patch)) == -1)
+                        if (newLines.FindIndex(x => x.Contains(patch)) == -1)
                         {
                             newLines.Add(address + " " + patch);
                             write = true;
@@ -348,11 +366,11 @@ namespace EZBlocker2
                 {
                     foreach (string patch in hostsPatches)
                     {
-                        int index = newLines.FindIndex(x => x.ToLower().Contains(patch));
-                        while (index != -1)
+                        int index = newLines.FindIndex(x => x.Contains(patch));
+                        while (index > -1)
                         {
                             newLines.RemoveAt(index);
-                            index = newLines.FindIndex(x => x.ToLower().Contains(patch));
+                            index = newLines.FindIndex(x => x.Contains(patch));
                             write = true;
                         }
                     }
@@ -402,7 +420,7 @@ namespace EZBlocker2
                 if (Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Packages")) // Windows 8+
                 {
                     List<string> lines = new List<string>(Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Packages"));
-                    string folder = lines.Find(x => x.Contains("SpotifyAB.SpotifyMusic"));
+                    string folder = lines.Find(x => x.ToLower().Contains("spotifyab.spotifymusic"));
                     if (folder != null)
                     {
                         spotifyPrefsFullFile = folder + @"\LocalState\Spotify\prefs";
@@ -423,6 +441,9 @@ namespace EZBlocker2
 
                 try
                 {
+                    string spotifyPrefsPath = Path.GetDirectoryName(spotifyPrefsFullFile);
+                    if (!Directory.Exists(spotifyPrefsPath))
+                        Directory.CreateDirectory(spotifyPrefsPath);
                     if (!File.Exists(spotifyPrefsFullFile))
                         File.Create(spotifyPrefsFullFile).Close();
 

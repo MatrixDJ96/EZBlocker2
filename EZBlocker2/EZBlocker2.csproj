@@ -60,6 +60,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SecurityProtocol\SslProtocolsExtensions.cs" />
+    <Compile Include="SecurityProtocol\SecurityProtocolTypeExtensions.cs" />
     <Compile Include="CustomSettingsProvider.cs" />
     <Compile Include="CustomToolStripRenderer.cs" />
     <Compile Include="MainForm.cs">

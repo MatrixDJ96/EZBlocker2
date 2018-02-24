@@ -22,7 +22,7 @@ namespace EZBlocker2
                 line = lines.Find(x => x.ToLower().Contains(propertyName));
                 if (line != null)
                 {
-                    line = line.Replace(propertyName, "").Replace("=", "").Trim().ToLower();
+                    line = line.Replace(propertyName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).ToLower();
                     if (line != "false" && line != "true")
                         line = null;
                 }
@@ -51,7 +51,7 @@ namespace EZBlocker2
             {
                 if (currentLines[i].Contains(valueName))
                 {
-                    if (!currentLines[i].Replace(valueName, "").Trim(new[] { ' ', '\t' }).Equals(newValue))
+                    if (!currentLines[i].Replace(valueName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).Equals(newValue))
                         newLines[i] = valueName + "=" + newValue;
                     found = true;
                 }
@@ -63,7 +63,6 @@ namespace EZBlocker2
                 {
                     if (!newLines[i].Equals(currentLines[i]))
                     {
-                        newLines.RemoveAll(x => x.Equals(""));
                         File.WriteAllLines(ezBlockerSettings, newLines);
                         break;
                     }
@@ -71,7 +70,6 @@ namespace EZBlocker2
             }
             else
             {
-                newLines.RemoveAll(x => x.Equals(""));
                 newLines.Add(valueName + "=" + newValue);
                 File.WriteAllLines(ezBlockerSettings, newLines);
             }
