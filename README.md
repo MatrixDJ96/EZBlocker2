@@ -14,7 +14,7 @@ You could choose 2 different options:
 - Block ads (apply hosts patches on system to prevent ads on Spotify from loading)
 
 <b>No setup required, it's a portable application!</b><br>
-To update your EZBlocker 2, replace the executable or use <b>auto-update</b> process.<br/>
+To update your EZBlocker 2, replace the executable or use <b>auto-update</b> process.<br>
 
 #
 
@@ -28,7 +28,7 @@ Block ads:
 
 ### Error reporting
 
-EZBlocker 2 will create a log with all errors detected. If you want to open a problem on GitHub, it would be better to attach that log to receive a better solution.
+EZBlocker 2 will create a log with all errors detected. If you want to open a issue on GitHub, it would be better to attach that log to receive a better solution.
 
 #
 
