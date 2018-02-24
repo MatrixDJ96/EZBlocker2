@@ -51,6 +51,16 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.0.0.8:
+- Fixed minor crashes
+- Fixed update process
+- Fixed host patches applying process
+- Fixed hosts patches
+- Options StartMinized and StartOnLogin separated
+- Added all security protocols for the network connect
+- Changed exit timeout to 3 seconds
+- Fixed issue #1 (the last second of ads are not muted)
+
 Version 2.0.0.7:
 - Added SndVol32.exe check for system volume mixer
 - Improved songs detection
