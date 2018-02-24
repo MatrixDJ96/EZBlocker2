@@ -62,8 +62,6 @@ namespace EZBlocker2
 
                     string entry = null;
                     {
-                        StringComparison comp = StringComparison.OrdinalIgnoreCase;
-
                         startInfo.Arguments = $"l \"{updateFullFile}\"";
                         List<string> lines = new List<string>(StartProcess(startInfo, true));
 
