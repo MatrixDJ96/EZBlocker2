@@ -49,7 +49,6 @@ namespace EZBlocker2
             "ads-fa.spotify.com",
             "adnxs.com",
             "adnxs.comadplexmedia.adk2x.com",
-            "apresolve.spotify.com",
             "analytics.spotify.com",
             "audio-sp-sto.spotify.com",
             "audio2.spotify.com",
@@ -82,7 +81,6 @@ namespace EZBlocker2
             "redirector.gvt1.com",
             "s0.2mdn.net",
             "securepubads.g.doubleclick.net",
-            "spclient.wg.spotify.com",
             "server-54-230-216-203.mrs50.r.cloudfront.net",
             "seen-on-screen.thewhizmarketing.com",
             "tpc.googlesyndication.com",
@@ -100,8 +98,10 @@ namespace EZBlocker2
         private readonly string[] oldHostsPatches =
         {
             "ads.pubmatic.com",
+            "apresolve.spotify.com",
             "gads.pubmatic.com",
-            "pubads.g.doubleclisck.net"
+            "pubads.g.doubleclisck.net",
+            "spclient.wg.spotify.com"
         };
 
         // Form movement
