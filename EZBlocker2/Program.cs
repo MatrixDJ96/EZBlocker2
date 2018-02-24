@@ -149,7 +149,7 @@ namespace EZBlocker2
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                ServicePointManager.SecurityProtocol |= SecurityProtocolTypeExtensions.Tls12; // fix connection to GitHub
+                ServicePointManager.SecurityProtocol = SecurityProtocolTypeExtensions.SystemDefault | SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolTypeExtensions.Tls11 | SecurityProtocolTypeExtensions.Tls12; // fix connection to GitHub
 
                 Application.Run(new UpdateForm());
                 Application.Run(new MainForm());
