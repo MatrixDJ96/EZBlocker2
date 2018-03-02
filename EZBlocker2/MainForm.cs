@@ -712,7 +712,10 @@ namespace EZBlocker2
                     checkBoxBlockAds.CheckedChanged += new EventHandler(CheckBoxBlockAds_CheckedChanged);
                 }
                 else
+                {
+                    MessageBox.Show("It could be necessary to restart Spotify or your computer for this changes to take effect.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Properties.Settings.Default.Save();
+                }
             }
             catch
             {
