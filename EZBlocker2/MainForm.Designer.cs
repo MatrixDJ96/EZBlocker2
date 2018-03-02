@@ -58,8 +58,8 @@ namespace EZBlocker2
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.timerMain = new System.Windows.Forms.Timer(this.components);
             this.timerSleep = new System.Windows.Forms.Timer(this.components);
+            this.timerStatus = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.imgSpotifyLogo)).BeginInit();
             this.panelMain.SuspendLayout();
             this.panelStatusBar.SuspendLayout();
@@ -446,13 +446,13 @@ namespace EZBlocker2
             this.notifyIcon.Text = "EZBlocker 2";
             this.notifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.NotifyIcon_MouseDoubleClick);
             // 
-            // timerMain
-            // 
-            this.timerMain.Tick += new System.EventHandler(this.TimerMain_Tick);
-            // 
             // timerSleep
             // 
             this.timerSleep.Tick += new System.EventHandler(this.TimerSleep_Tick);
+            // 
+            // timerStatus
+            // 
+            this.timerStatus.Tick += new System.EventHandler(this.TimerStatus_Tick);
             // 
             // MainForm
             // 
@@ -506,9 +506,9 @@ namespace EZBlocker2
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.NotifyIcon notifyIcon;
-        private System.Windows.Forms.Timer timerMain;
         private System.Windows.Forms.Timer timerSleep;
         private System.Windows.Forms.Label titleLabel;
+        private System.Windows.Forms.Timer timerStatus;
     }
 }
 

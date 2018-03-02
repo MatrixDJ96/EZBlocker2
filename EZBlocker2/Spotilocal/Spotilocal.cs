@@ -15,13 +15,14 @@ namespace EZBlocker2
         private static readonly string open_spotify = "https://open.spotify.com";
         private static readonly string host = "http://127.0.0.1";
         private static readonly int timeout = 2000;
-        private static int port = 0; // to initialize with GetPort()
+        private static int port = 0;
 
         private static string oauth;
         private static string csrf;
 
-        public static string User_Agent => user_agent;
         public static int Timeout => timeout;
+
+        public static CustomEmitter emitter = new CustomEmitter();
 
         public static bool GetPort()
         {
@@ -57,98 +58,98 @@ namespace EZBlocker2
                 return false;
         }
 
-        private static string GetCSRF()
-        {
-            if (port == 0)
-                if (!GetPort())
-                    throw new Exception("No Spotify port found");
-
-            WebRequest request = WebRequest.Create(host + ":" + port.ToString() + "/simplecsrf/token.json");
-            request.Headers.Add("Origin", open_spotify);
-            request.Timeout = timeout;
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
-            string json = reader.ReadToEnd();
-
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-
-            csrf = JsonConvert.DeserializeObject<CsrfToken>(json).Token;
-            return csrf;
-        }
-
-        private static string GetOAuth()
-        {
-            WebRequest request = WebRequest.Create(open_spotify + "/token");
-            ((HttpWebRequest)request).UserAgent = user_agent;
-            request.Timeout = timeout;
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-            Stream dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
-            string json = reader.ReadToEnd();
-
-            reader.Close();
-            dataStream.Close();
-            response.Close();
-
-            oauth = JsonConvert.DeserializeObject<OAuthToken>(json).T;
-            return oauth;
-        }
-
-        public static SpotilocalStatus GetStatus()
+        private static void CSRF_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
         {
             try
             {
-                if (csrf == null)
-                    GetCSRF();
-                if (oauth == null)
-                    GetOAuth();
+                csrf = JsonConvert.DeserializeObject<CsrfToken>(e.Result).Token;
 
-                WebRequest request = WebRequest.Create(host + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth);
-                request.Headers.Add("Origin", open_spotify);
-                request.Timeout = timeout;
+                WebClient client = new WebClient();
+                client.Headers.Add("User-Agent", user_agent);
+                // TODO: add timeout
 
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-                Stream dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-                string json = reader.ReadToEnd();
-
-                reader.Close();
-                dataStream.Close();
-                response.Close();
-
-                SpotilocalStatus status = JsonConvert.DeserializeObject<SpotilocalStatus>(json);
-
-                if (status.Error.Message.ToLower().Contains("csrf"))
-                    csrf = null;
-                if (status.Error.Message.ToLower().Contains("oauth"))
-                    oauth = null;
-
-                return status;
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(OAuth_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(open_spotify + "/token"));
             }
             catch (Exception ex)
             {
-                try
-                {
-                    List<string> lines = new List<string>
+                WriteLog(ex.Message);
+            }
+        }
+
+        private static void OAuth_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                oauth = JsonConvert.DeserializeObject<OAuthToken>(e.Result).T;
+
+                WebClient client = new WebClient();
+                client.Headers.Add("Origin", open_spotify);
+                // TODO: add timeout
+
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(Status_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex.Message);
+            }
+        }
+
+        private static void Status_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        {
+            try
+            {
+                emitter.Status = JsonConvert.DeserializeObject<SpotilocalStatus>(e.Result);
+
+                if (emitter.Status.Error.Message.ToLower().Contains("csrf"))
+                    csrf = null;
+                if (emitter.Status.Error.Message.ToLower().Contains("oauth"))
+                    oauth = null;
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex.Message);
+            }
+        }
+
+        public static void GetStatus()
+        {
+            try
+            {
+                if (port == 0 && !GetPort())
+                    throw new Exception("No Spotify port found");
+
+                WebClient client = new WebClient();
+                client.Headers.Add("Origin", open_spotify);
+                // TODO: add timeout
+
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(CSRF_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/simplecsrf/token.json"));
+            }
+            catch (Exception ex)
+            {
+                WriteLog(ex.Message);
+            }
+        }
+
+        public static void WriteLog(string message)
+        {
+            try
+            {
+                List<string> lines = new List<string>
                     {
                         DateTime.Now.ToString(),
                         "port=" + port.ToString(),
                         "csrf=" + csrf,
                         "oauth=" + oauth,
-                        "error=" + ex.Message,
+                        "error=" + message,
                         "-------------------"
                     };
-                    File.AppendAllLines(ezBlockerLog, contents: lines);
-                }
-                catch { }
-                return new SpotilocalStatus(ex.Message);
+                File.AppendAllLines(ezBlockerLog, contents: lines);
             }
+            catch { }
+            emitter.Status = new SpotilocalStatus(message);
         }
     }
 }

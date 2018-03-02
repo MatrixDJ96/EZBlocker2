@@ -4,6 +4,6 @@
     {
         private string private_session = "false";
 
-        public string Private_session { get => private_session; set => private_session = value; }
+        public string Private_session { get => private_session; set => private_session = value.ToLower(); }
     }
 }

@@ -130,7 +130,7 @@ namespace EZBlocker2
                 DeleteFile(ezBlockerFullExeOld);
 
                 WebRequest request = WebRequest.Create(website);
-                request.Timeout = Spotilocal.Timeout;
+                request.Timeout = 3000; // 3 seconds
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Stream dataStream = response.GetResponseStream();
                 StreamReader reader = new StreamReader(dataStream);

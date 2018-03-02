@@ -109,10 +109,10 @@ namespace EZBlocker2
         private Point dragCursorPoint;
         private Point dragFormPoint;
 
-        // Spotify system volume
+        // Spotify system volume variables
         private bool muted = false;
-        private int maxWait = 2;
-        private int wait = -1;
+        private readonly int maxWait = 3;
+        private int wait = 3; // same as maxWait
 
         // Useful booleans
         private bool winStoreApp = false;
@@ -125,6 +125,9 @@ namespace EZBlocker2
 
         // Label message
         private string[] message; // useful to store info
+
+        // Listener
+        private CustomListener listener;
 
         /* Constructor */
         public MainForm()
@@ -228,13 +231,11 @@ namespace EZBlocker2
         private void Mute(bool enable)
         {
             if (muted == enable)
-                return;
-
-            if (wait == -1)
             {
-                wait = maxWait - 1; // skip one
+                return;
             }
-            else if (wait > -1)
+
+            if (wait > 0)
             {
                 wait--;
                 return;
@@ -553,7 +554,13 @@ namespace EZBlocker2
             if (IsSpotifyRunning() || countdown == 0)
             {
                 timerSleep.Enabled = false;
-                timerMain.Enabled = true;
+
+                listener = new CustomListener(this);
+                Spotilocal.emitter.NewStatus += listener.StatusHandler;
+
+                ShowMessage("Checking Spotify port...");
+
+                timerStatus.Enabled = true;
             }
             else if (countdown > 0)
             {
@@ -562,15 +569,19 @@ namespace EZBlocker2
             }
         }
 
-        private void TimerMain_Tick(object sender, EventArgs e)
+        private void TimerStatus_Tick(object sender, EventArgs e)
         {
-            timerMain.Enabled = false; // wait...
-            timerMain.Interval = 500;
+            timerStatus.Enabled = false; // wait...
+            timerStatus.Interval = 750;
 
+            Spotilocal.GetStatus();
+        }
+
+        internal void Main_Status(SpotilocalStatus status)
+        {
             bool enable = true; // start?
             message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
 
-            SpotilocalStatus status = Spotilocal.GetStatus();
             if (!status.IsError)
             {
                 if (status.IsPrivateSession)
@@ -596,19 +607,19 @@ namespace EZBlocker2
             }
             else
             {
-                if (IsSpotifyRunning())
-                    ShowMessage("Error: " + status.Error.Message);
-                else
+                if (!IsSpotifyRunning())
                 {
                     enable = false; // stop!
                     MinimizeEZBlocker();
                     notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
                     CloseEZBlocker(3000);
                 }
+                else
+                    ShowMessage("Error: " + status.Error.Message);
             }
 
             if (enable)
-                timerMain.Enabled = true; // go!
+                timerStatus.Enabled = true; // go!
         }
 
         private void MainForm_MouseDown(object sender, MouseEventArgs e)
