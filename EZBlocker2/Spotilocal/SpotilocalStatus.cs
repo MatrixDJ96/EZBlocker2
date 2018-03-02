@@ -1,4 +1,6 @@
-﻿namespace EZBlocker2
+﻿using System;
+
+namespace EZBlocker2
 {
     internal class SpotilocalStatus
     {
@@ -16,6 +18,7 @@
         public Track Track { get => track; set => track = value; }
         public OpenGraphState Open_graph_state { get => open_graph_state; set => open_graph_state = value; }
 
+        public string Message => error.Message;
         public bool IsError => !error.Message.Equals("");
         public bool IsPlaying => playing.Equals("true");
         public bool IsAd => next_enabled.Equals("false");

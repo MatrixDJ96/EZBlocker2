@@ -572,7 +572,7 @@ namespace EZBlocker2
         private void TimerStatus_Tick(object sender, EventArgs e)
         {
             timerStatus.Enabled = false; // wait...
-            timerStatus.Interval = 750;
+            timerStatus.Interval = 500;
 
             Spotilocal.GetStatus();
         }
@@ -582,41 +582,46 @@ namespace EZBlocker2
             bool enable = true; // start?
             message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
 
-            if (!status.IsError)
+            if (Spotilocal.Status != Spotilocal.Hooking)
             {
-                if (status.IsPrivateSession)
-                    ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
-                else
+                if (!status.IsError)
                 {
-                    if (status.IsPlaying)
+                    if (status.IsPrivateSession)
+                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
+                    else
                     {
-                        Mute(status.IsAd && checkBoxMuteAds.Checked);
-                        if (status.IsAd)
+                        if (status.IsPlaying)
                         {
-                            if (checkBoxMuteAds.Checked)
-                                ShowMessage("Muting: Ad");
+                            Mute(status.IsAd && checkBoxMuteAds.Checked);
+                            if (status.IsAd)
+                            {
+                                if (checkBoxMuteAds.Checked)
+                                    ShowMessage("Muting: Ad");
+                                else
+                                    ShowMessage("Playing: Ad");
+                            }
                             else
-                                ShowMessage("Playing: Ad");
+                                ShowMessage("Playing: " + status.Track.Song, "Artist: " + status.Track.Artist, "Album: " + status.Track.Album);
                         }
                         else
-                            ShowMessage("Playing: " + status.Track.Song, "Artist: " + status.Track.Artist, "Album: " + status.Track.Album);
+                            ShowMessage("Spotify is in pause");
+                    }
+                }
+                else
+                {
+                    if (!IsSpotifyRunning())
+                    {
+                        enable = false; // stop!
+                        MinimizeEZBlocker();
+                        notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                        CloseEZBlocker(3000);
                     }
                     else
-                        ShowMessage("Spotify is in pause");
+                        ShowMessage("Error: " + status.Message);
                 }
             }
             else
-            {
-                if (!IsSpotifyRunning())
-                {
-                    enable = false; // stop!
-                    MinimizeEZBlocker();
-                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                    CloseEZBlocker(3000);
-                }
-                else
-                    ShowMessage("Error: " + status.Error.Message);
-            }
+                ShowMessage(status.Message);
 
             if (enable)
                 timerStatus.Enabled = true; // go!
