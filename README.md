@@ -51,6 +51,10 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.1.0:
+- Improved and fixed Spotify status checking process
+- Updated user agent
+
 Version 2.1.0.0:
 - Significant improvement of the Spotify status checking process
 - Updated hosts patches
