@@ -96,8 +96,7 @@ namespace EZBlocker2
             "www.omaze.com"
         };
 
-        private readonly string[] oldHostsPatches =
-        {
+        private readonly string[] oldHostsPatches = {
             "ads.pubmatic.com",
             "apresolve.spotify.com",
             "gads.pubmatic.com",
