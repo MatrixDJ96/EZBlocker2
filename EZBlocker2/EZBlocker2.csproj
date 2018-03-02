@@ -60,9 +60,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomEmitter.cs" />
+    <Compile Include="CustomListener.cs" />
     <Compile Include="SecurityProtocol\SslProtocolsExtensions.cs" />
     <Compile Include="SecurityProtocol\SecurityProtocolTypeExtensions.cs" />
-    <Compile Include="CustomSettingsProvider.cs" />
+    <Compile Include="Settings\CustomSettingsProvider.cs" />
     <Compile Include="CustomToolStripRenderer.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -72,13 +74,13 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="Spotilocal\Json\CsrfToken.cs" />
-    <Compile Include="Spotilocal\Json\Error.cs" />
-    <Compile Include="Spotilocal\Json\OAuthToken.cs" />
-    <Compile Include="Spotilocal\Json\OpenGraphState.cs" />
-    <Compile Include="Spotilocal\Json\Resource.cs" />
-    <Compile Include="Spotilocal\Json\Track.cs" />
+    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Spotilocal\JSON\CsrfToken.cs" />
+    <Compile Include="Spotilocal\JSON\Error.cs" />
+    <Compile Include="Spotilocal\JSON\OAuthToken.cs" />
+    <Compile Include="Spotilocal\JSON\OpenGraphState.cs" />
+    <Compile Include="Spotilocal\JSON\Resource.cs" />
+    <Compile Include="Spotilocal\JSON\Track.cs" />
     <Compile Include="Spotilocal\Spotilocal.cs" />
     <Compile Include="Spotilocal\SpotilocalStatus.cs" />
     <Compile Include="UpdateForm.cs">
