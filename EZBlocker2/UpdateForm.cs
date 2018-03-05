@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Windows.Forms;
 using static EZBlocker2.Program;
@@ -14,8 +13,6 @@ namespace EZBlocker2
     {
         // Resources
         private readonly string ezBlockerFullExeOld = ezBlockerFullExe + ".old";
-        private readonly string _7zaFullExe = Application.StartupPath + @"\7za.exe";
-
 
         // Download stuff
         private readonly string website = "https://github.com/MatrixDJ96/EZBlocker2/releases/latest";
@@ -53,44 +50,25 @@ namespace EZBlocker2
                 {
                     bool success = false; // must be false at the beginning
 
-                    ExtractFile(_7zaFullExe, Properties.Resources._7za);
-
-                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    using (ZipArchive archive = ZipFile.OpenRead(updateFullFile))
                     {
-                        FileName = _7zaFullExe
-                    };
-
-                    string entry = null;
-                    {
-                        startInfo.Arguments = $"l \"{updateFullFile}\"";
-                        List<string> lines = new List<string>(StartProcess(startInfo, true));
-
-                        string line = lines.Find(x => x.IndexOf("ezblocker", comp) > -1 && x.Substring(x.Length - 4).Equals(".exe", comp));
-
-                        if (line != null)
-                            entry = line.Substring(line.IndexOf("ezblocker", comp));
-                    }
-
-                    if (entry != null)
-                    {
-                        File.Move(ezBlockerFullExe, ezBlockerFullExeOld);
-                        DeleteFile(Application.StartupPath + $@"\{entry}");
-
-                        startInfo.Arguments = $"e \"{updateFullFile}\" \"{entry}\"";
-                        List<string> lines = new List<string>(StartProcess(startInfo, true));
-
-                        if (lines.Find(x => x.ToLower().Contains("error")) == null)
-                            success = true;
+                        foreach (ZipArchiveEntry file in archive.Entries)
+                        {
+                            if (file.FullName.ToLower().Contains("ezblocker") && file.FullName.Substring(file.FullName.Length - 4).Equals(".exe", comp))
+                            {
+                                File.Move(ezBlockerFullExe, ezBlockerFullExeOld);
+                                file.ExtractToFile(Application.StartupPath + $@"\{file.FullName}");
+                                if (!file.FullName.Equals(ezBlockerExe))
+                                    File.Move(Application.StartupPath + $@"\{file.FullName}", ezBlockerFullExe);
+                                success = true;
+                                break;
+                            }
+                        }
                     }
 
                     if (success)
                     {
-                        if (!entry.Equals(ezBlockerExe))
-                            File.Move(Application.StartupPath + $@"\{entry}", ezBlockerFullExe);
-
-                        DeleteFile(_7zaFullExe);
                         DeleteFile(updateFullFile);
-
                         RestartEZBlocker();
                     }
                     else
