@@ -70,12 +70,15 @@ namespace EZBlocker2
 
         private static void GetCSRF()
         {
-            WebClient client = new WebClient();
-            client.Headers.Add("Origin", open_spotify);
-            // TODO: add timeout
+            if (csrf == null)
+            {
+                WebClient client = new WebClient();
+                client.Headers.Add("Origin", open_spotify);
+                // TODO: add timeout
 
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(CSRF_DownloadStringCompleted);
-            client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/simplecsrf/token.json"));
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(CSRF_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/simplecsrf/token.json"));
+            }
         }
 
         private static void CSRF_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
@@ -92,12 +95,15 @@ namespace EZBlocker2
 
         private static void GetOAuth()
         {
-            WebClient client = new WebClient();
-            client.Headers.Add("User-Agent", user_agent);
-            // TODO: add timeout
+            if (oauth == null)
+            {
+                WebClient client = new WebClient();
+                client.Headers.Add("User-Agent", user_agent);
+                // TODO: add timeout
 
-            client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(OAuth_DownloadStringCompleted);
-            client.DownloadStringAsync(new Uri(open_spotify + "/token"));
+                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(OAuth_DownloadStringCompleted);
+                client.DownloadStringAsync(new Uri(open_spotify + "/token"));
+            }
         }
 
         private static void OAuth_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
@@ -121,10 +127,8 @@ namespace EZBlocker2
 
                 if (csrf == null || oauth == null)
                 {
-                    if (csrf == null)
-                        GetCSRF();
-                    if (oauth == null)
-                        GetOAuth();
+                    GetCSRF();
+                    GetOAuth();
                     throw new Exception("Hooking to Spotify...", new Exception(hooking));
                 }
 
@@ -152,9 +156,9 @@ namespace EZBlocker2
                 emitter.Status = JsonConvert.DeserializeObject<SpotilocalStatus>(e.Result);
 
                 if (emitter.Status.Error.Message.ToLower().Contains("csrf"))
-                    GetCSRF();
+                    csrf = null;
                 if (emitter.Status.Error.Message.ToLower().Contains("oauth"))
-                    GetOAuth();
+                    oauth = null;
             }
             catch (Exception ex)
             {
