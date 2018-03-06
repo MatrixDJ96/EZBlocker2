@@ -7,7 +7,7 @@
 ### Information
 
 EZBlocker 2 is ad muter/blocker for Spotify.<br>
-It is compatible with every O.S. which supports <b>.NET Framework 4.0</b>.
+It is compatible with every O.S. which supports <b>.NET Framework 4.5</b>.
 
 You could choose 2 different options:
 - Mute ads (if an ad does load, it will mute Spotify until the ad is over)
