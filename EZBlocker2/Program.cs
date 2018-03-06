@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -20,9 +21,21 @@ namespace EZBlocker2
         // EZBlocker 2
         public static readonly string ezBlockerFullExe = Application.ExecutablePath.Replace("/", "\\");
         public static readonly string ezBlockerExe = Path.GetFileName(ezBlockerFullExe);
+        public static readonly string ezBlockerLog = Path.GetFileNameWithoutExtension(ezBlockerFullExe) + ".log";
 
         // StringComparison
         public static StringComparison comp = StringComparison.OrdinalIgnoreCase;
+
+        public static bool HasNet45()
+        {
+            using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full"))
+            {
+                if (ndpKey != null && ndpKey.GetValue("Release") != null && (int)ndpKey.GetValue("Release") >= 378389)
+                    return true;
+                else
+                    return false;
+            }
+        }
 
         public static bool IsFirstInstance()
         {
@@ -144,18 +157,23 @@ namespace EZBlocker2
         [STAThread]
         static void Main()
         {
-            if (IsFirstInstance())
+            if (HasNet45())
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
+                if (IsFirstInstance())
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
 
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12; // enable all protocols
-                
-                Application.Run(new UpdateForm());
-                Application.Run(new MainForm());
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12; // enable all protocols
+
+                    Application.Run(new UpdateForm());
+                    Application.Run(new MainForm());
+                }
+                else
+                    MessageBox.Show("There is already another instance running!", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
-                MessageBox.Show("There is already another instance running!", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(".NET Framework 4.5 is required to run EZBlocker 2...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

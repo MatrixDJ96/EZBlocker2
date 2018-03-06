@@ -11,7 +11,6 @@ namespace EZBlocker2
     {
         private static Exception ex = new Exception();
 
-        private static readonly string ezBlockerLog = Path.GetFileNameWithoutExtension(ezBlockerFullExe) + ".log";
         private static readonly string user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0";
         private static readonly string open_spotify = "https://open.spotify.com";
         private static readonly string host = "http://127.0.0.1";

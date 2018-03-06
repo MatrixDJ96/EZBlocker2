@@ -32,7 +32,7 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 #
 
-### [Download for Windows][8]
+### [Download for Windows][7]
 
 #
 
@@ -45,7 +45,6 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 - Steven Black for [hosts][4] patches
 - Mark Heath for [NAudio][5] library
 - James Newton-King for [Json.NET][6] library
-- Igor Pavlov for [7-Zip][7] binary
 
 #
 
@@ -136,5 +135,4 @@ Version 2.0.0.0:
 [4]: https://github.com/FadeMind/hosts.extras
 [5]: https://github.com/naudio/NAudio
 [6]: https://github.com/JamesNK/Newtonsoft.Json
-[7]: http://www.7-zip.org/
-[8]: https://github.com/MatrixDJ96/EZBlocker2/releases
+[7]: https://github.com/MatrixDJ96/EZBlocker2/releases
