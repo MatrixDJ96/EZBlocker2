@@ -39,14 +39,14 @@ namespace EZBlocker2
             WebRequest request;
             int timeout = 20;
 
-            int port = 4370; // default port
+            int i_port = 4370; // initial port
             int f_port = 4390; // final port
 
-            while (port <= f_port)
+            while (i_port <= f_port)
             {
                 try
                 {
-                    request = WebRequest.Create(host + ":" + port.ToString());
+                    request = WebRequest.Create(host + ":" + i_port.ToString());
                     request.Timeout = timeout;
                     request.GetResponse().Close();
                 }
@@ -55,13 +55,13 @@ namespace EZBlocker2
                     if (ex.Status == WebExceptionStatus.ProtocolError)
                         break;
                     else
-                        port++;
+                        i_port++;
                 }
             }
 
-            if (port <= f_port)
+            if (i_port <= f_port)
             {
-                Spotilocal.port = port;
+                port = i_port;
                 return true;
             }
             else

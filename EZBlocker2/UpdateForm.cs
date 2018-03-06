@@ -91,8 +91,8 @@ namespace EZBlocker2
         private void StartDownload()
         {
             client = new WebClient();
-            client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(Client_DownloadProgressChanged);
-            client.DownloadFileCompleted += new AsyncCompletedEventHandler(Client_DownloadFileCompleted);
+            client.DownloadProgressChanged += Client_DownloadProgressChanged;
+            client.DownloadFileCompleted += Client_DownloadFileCompleted;
             client.DownloadFileAsync(address, updateFullFile);
         }
 
@@ -112,7 +112,7 @@ namespace EZBlocker2
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
                 Stream dataStream = response.GetResponseStream();
                 StreamReader reader = new StreamReader(dataStream);
-                string responseFromServer = reader.ReadToEnd();
+                string page = reader.ReadToEnd();
 
                 reader.Close();
                 dataStream.Close();
@@ -123,30 +123,53 @@ namespace EZBlocker2
                 scurrent = "v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 icurrent = Convert.ToInt32(scurrent.Replace("v", "").Replace(".", ""));
 
-                if (ilatest > icurrent && MessageBox.Show($"A newer version of EZBlocker 2 has been found!\r\nWould you like to update? ({scurrent} to {slatest})", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                if (ilatest > icurrent)
                 {
-                    int end = responseFromServer.IndexOf(".zip") + 4;
-                    int start = end - 4;
-                    while (responseFromServer[start] != '/')
-                        start--;
+                    // Check if zip file is available
+                    string updateFile = "";
+                    int start = page.IndexOf("/releases/download/" + slatest);
+                    if (start != -1)
+                    {
+                        int length = slatest.Length;
+                        while (page.Substring(start, length) != slatest)
+                            start++;
 
-                    string updateFile = null;
-                    for (int i = start + 1; i < end; i++)
-                        updateFile += responseFromServer[i];
+                        start += length + 1;
 
-                    updateFullFile = Application.StartupPath + $@"\{updateFile}";
-                    address = new Uri(response.ResponseUri.OriginalString.Replace("tag", "download") + $"/{updateFile}");
+                        while (page.Substring(start, 4) != ".zip")
+                            updateFile += page[start++];
 
-                    StartDownload();
+                        updateFile += ".zip";
+                        updateFullFile = Application.StartupPath + $@"\{updateFile}";
+                                                
+                        address = new Uri(response.ResponseUri.OriginalString.Replace("/tag/", "/download/") + $"/{updateFile}");
+                    }
+
+                    // Check if changelog is available
+                    string changelog = "";
+                    start = page.IndexOf(slatest.Substring(1) + ":");
+                    if (start != -1)
+                    {
+                        while (page.Substring(start, 4) != "<li>")
+                            start++;
+
+                        changelog += "\r\n\r\nChangelog:\r\n";
+
+                        while (page.Substring(start, 5) != "</ul>")
+                            changelog += page[start++];
+
+                        changelog = changelog.Replace("<li>", "- ").Replace("</li>", "");
+                    }
+                    
+                    if (address != null && MessageBox.Show($"A newer version of EZBlocker 2 has been found!\r\nWould you like to update? ({scurrent} to {slatest}){changelog}", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                    {
+                        StartDownload();
+                        return;
+                    }
                 }
-                else
-                    Close();
             }
-            catch
-            {
-                DeleteFile(updateFullFile); // remove downloaded file
-                Close();
-            }
+            catch { }
+            Close();
         }
 
         private void UpdateForm_MouseDown(object sender, MouseEventArgs e)
