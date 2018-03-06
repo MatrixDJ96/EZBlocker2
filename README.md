@@ -51,6 +51,15 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.2.0:
+- Added info message when you enable/disable hosts patches
+- Revert 'Downgraded .NET Framework to v4.0'
+- Updated JSON library
+- Improved update process
+- Improved SpotilocalStatus
+- Removed useless using directives
+- Fixed minor bug
+
 Version 2.1.1.0:
 - Improved and fixed Spotify status checking process
 - Updated user agent
