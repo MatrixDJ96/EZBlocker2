@@ -24,13 +24,21 @@ namespace EZBlocker2
 
         public static CustomEmitter emitter = new CustomEmitter();
 
-        public static string Status => GetInnerMessage();
+        public static string InnerMessage => GetMessage(true);
 
-        private static string GetInnerMessage()
+        private static string GetMessage(bool inner = false)
         {
             string message = "";
-            if (ex.InnerException != null)
-                message = ex.InnerException.Message;
+            if (ex != null)
+            {
+                if (!inner)
+                    message = ex.Message;
+                else
+                {
+                    if (ex.InnerException != null)
+                        message = ex.InnerException.Message;
+                }
+            }
             return message;
         }
 
@@ -120,6 +128,9 @@ namespace EZBlocker2
 
         public static void GetStatus()
         {
+            if (GetMessage() != "" || GetMessage(true) != "") // clear exception
+                ex = new Exception();
+
             try
             {
                 if (port == 0 && !GetPort())
@@ -131,9 +142,6 @@ namespace EZBlocker2
                     GetOAuth();
                     throw new Exception("Hooking to Spotify...", new Exception(hooking));
                 }
-
-                if (ex.InnerException != null) // clear InnerException message
-                    ex = new Exception();
 
                 WebClient client = new WebClient();
                 client.Headers.Add("Origin", open_spotify);
@@ -169,7 +177,7 @@ namespace EZBlocker2
         public static void WriteLog(Exception ex)
         {
             Spotilocal.ex = ex;
-            if (GetInnerMessage() != hooking)
+            if (GetMessage(true) != hooking)
             {
                 try
                 {

@@ -578,7 +578,7 @@ namespace EZBlocker2
             bool enable = true; // start?
             message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
 
-            if (Spotilocal.Status != Spotilocal.Hooking)
+            if (Spotilocal.InnerMessage != Spotilocal.Hooking)
             {
                 if (!status.IsError)
                 {
