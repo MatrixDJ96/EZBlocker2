@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EZBlocker2
+﻿namespace EZBlocker2
 {
     internal class SpotilocalStatus
     {
