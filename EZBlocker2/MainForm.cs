@@ -613,7 +613,10 @@ namespace EZBlocker2
                         CloseEZBlocker(3000);
                     }
                     else
-                        ShowMessage("Error: " + status.Message);
+                    {
+                        string text = "Error: " + status.Message;
+                        ShowMessage(text, text);
+                    }
                 }
             }
             else
