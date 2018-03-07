@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using static EZBlocker2.Program;
 
 namespace EZBlocker2
@@ -83,16 +84,16 @@ namespace EZBlocker2
                 client.Headers.Add("Origin", open_spotify);
                 // TODO: add timeout
 
-                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(CSRF_DownloadStringCompleted);
-                client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/simplecsrf/token.json"));
+                client.DownloadDataCompleted += CSRF_DownloadDataCompleted;
+                client.DownloadDataAsync(new Uri(host + ":" + port.ToString() + "/simplecsrf/token.json"));
             }
         }
 
-        private static void CSRF_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private static void CSRF_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
             try
             {
-                csrf = JsonConvert.DeserializeObject<CsrfToken>(e.Result).Token;
+                csrf = JsonConvert.DeserializeObject<CsrfToken>(Encoding.UTF8.GetString(e.Result)).Token;
             }
             catch (Exception ex)
             {
@@ -108,16 +109,16 @@ namespace EZBlocker2
                 client.Headers.Add("User-Agent", user_agent);
                 // TODO: add timeout
 
-                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(OAuth_DownloadStringCompleted);
-                client.DownloadStringAsync(new Uri(open_spotify + "/token"));
+                client.DownloadDataCompleted += OAuth_DownloadDataCompleted;
+                client.DownloadDataAsync(new Uri(open_spotify + "/token"));
             }
         }
 
-        private static void OAuth_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private static void OAuth_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
             try
             {
-                oauth = JsonConvert.DeserializeObject<OAuthToken>(e.Result).T;
+                oauth = JsonConvert.DeserializeObject<OAuthToken>(Encoding.UTF8.GetString(e.Result)).T;
             }
             catch (Exception ex)
             {
@@ -146,8 +147,8 @@ namespace EZBlocker2
                 client.Headers.Add("Origin", open_spotify);
                 // TODO: add timeout
 
-                client.DownloadStringCompleted += new DownloadStringCompletedEventHandler(Status_DownloadStringCompleted);
-                client.DownloadStringAsync(new Uri(host + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
+                client.DownloadDataCompleted += Status_DownloadDataCompleted;
+                client.DownloadDataAsync(new Uri(host + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
 
             }
             catch (Exception ex)
@@ -156,11 +157,11 @@ namespace EZBlocker2
             }
         }
 
-        private static void Status_DownloadStringCompleted(object sender, DownloadStringCompletedEventArgs e)
+        private static void Status_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
             try
             {
-                emitter.Status = JsonConvert.DeserializeObject<SpotilocalStatus>(e.Result);
+                emitter.Status = JsonConvert.DeserializeObject<SpotilocalStatus>(Encoding.UTF8.GetString(e.Result));
 
                 if (emitter.Status.Error.Message.ToLower().Contains("csrf"))
                     csrf = null;
