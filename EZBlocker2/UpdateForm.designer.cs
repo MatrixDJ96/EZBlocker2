@@ -31,8 +31,8 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(UpdateForm));
             this.panelStatusBar = new System.Windows.Forms.Panel();
-            this.titleLabel = new System.Windows.Forms.Label();
             this.btnExit = new System.Windows.Forms.Button();
+            this.titleLabel = new System.Windows.Forms.Label();
             this.panelMain = new System.Windows.Forms.Panel();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.labelMessage = new System.Windows.Forms.Label();
@@ -44,13 +44,31 @@
             // panelStatusBar
             // 
             this.panelStatusBar.BackColor = System.Drawing.Color.Transparent;
-            this.panelStatusBar.Controls.Add(this.titleLabel);
             this.panelStatusBar.Controls.Add(this.btnExit);
+            this.panelStatusBar.Controls.Add(this.titleLabel);
             this.panelStatusBar.Location = new System.Drawing.Point(0, 0);
             this.panelStatusBar.Margin = new System.Windows.Forms.Padding(0);
             this.panelStatusBar.Name = "panelStatusBar";
-            this.panelStatusBar.Size = new System.Drawing.Size(300, 30);
+            this.panelStatusBar.Size = new System.Drawing.Size(350, 30);
             this.panelStatusBar.TabIndex = 0;
+            // 
+            // btnExit
+            // 
+            this.btnExit.BackgroundImage = global::EZBlocker2.Properties.Resources.Exit;
+            this.btnExit.Dock = System.Windows.Forms.DockStyle.Right;
+            this.btnExit.FlatAppearance.BorderSize = 0;
+            this.btnExit.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnExit.Location = new System.Drawing.Point(300, 0);
+            this.btnExit.Margin = new System.Windows.Forms.Padding(0);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(50, 30);
+            this.btnExit.TabIndex = 1;
+            this.btnExit.TabStop = false;
+            this.toolTip.SetToolTip(this.btnExit, "Abort update");
+            this.btnExit.UseVisualStyleBackColor = true;
+            this.btnExit.Click += new System.EventHandler(this.BtnExit_Click);
             // 
             // titleLabel
             // 
@@ -61,31 +79,13 @@
             this.titleLabel.Margin = new System.Windows.Forms.Padding(0);
             this.titleLabel.Name = "titleLabel";
             this.titleLabel.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-            this.titleLabel.Size = new System.Drawing.Size(250, 30);
+            this.titleLabel.Size = new System.Drawing.Size(350, 30);
             this.titleLabel.TabIndex = 0;
             this.titleLabel.Text = "Updater";
             this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.titleLabel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseDown);
             this.titleLabel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseMove);
             this.titleLabel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseUp);
-            // 
-            // btnExit
-            // 
-            this.btnExit.BackgroundImage = global::EZBlocker2.Properties.Resources.Exit;
-            this.btnExit.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnExit.FlatAppearance.BorderSize = 0;
-            this.btnExit.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.MenuHighlight;
-            this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.MenuHighlight;
-            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Location = new System.Drawing.Point(250, 0);
-            this.btnExit.Margin = new System.Windows.Forms.Padding(0);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(50, 30);
-            this.btnExit.TabIndex = 1;
-            this.btnExit.TabStop = false;
-            this.toolTip.SetToolTip(this.btnExit, "Abort update");
-            this.btnExit.UseVisualStyleBackColor = true;
-            this.btnExit.Click += new System.EventHandler(this.BtnExit_Click);
             // 
             // panelMain
             // 
@@ -97,7 +97,7 @@
             this.panelMain.Location = new System.Drawing.Point(0, 0);
             this.panelMain.Margin = new System.Windows.Forms.Padding(0);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(300, 114);
+            this.panelMain.Size = new System.Drawing.Size(350, 114);
             this.panelMain.TabIndex = 1;
             // 
             // progressBar
@@ -106,7 +106,7 @@
             this.progressBar.Location = new System.Drawing.Point(15, 75);
             this.progressBar.Margin = new System.Windows.Forms.Padding(0);
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(270, 25);
+            this.progressBar.Size = new System.Drawing.Size(320, 25);
             this.progressBar.TabIndex = 3;
             this.progressBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseDown);
             this.progressBar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseMove);
@@ -120,7 +120,7 @@
             this.labelMessage.Location = new System.Drawing.Point(0, 30);
             this.labelMessage.Margin = new System.Windows.Forms.Padding(0);
             this.labelMessage.Name = "labelMessage";
-            this.labelMessage.Size = new System.Drawing.Size(300, 40);
+            this.labelMessage.Size = new System.Drawing.Size(350, 40);
             this.labelMessage.TabIndex = 2;
             this.labelMessage.Text = "Starting download...";
             this.labelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -132,7 +132,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 114);
+            this.ClientSize = new System.Drawing.Size(350, 114);
             this.Controls.Add(this.panelMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

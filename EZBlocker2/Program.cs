@@ -61,7 +61,6 @@ namespace EZBlocker2
             {
                 process.StartInfo.FileName = filename;
                 process.StartInfo.Arguments = arguments ?? "";
-
                 process.Start();
             }
         }

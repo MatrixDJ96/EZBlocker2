@@ -33,13 +33,10 @@ namespace EZBlocker2
 
         void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            double bytesIn = double.Parse(e.BytesReceived.ToString());
-            double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
-            double percentage = bytesIn / totalBytes * 100;
-
-            Text = "Downloading: " + Math.Round(percentage, 2) + "%"; // title
-            labelMessage.Text = Text;
-            progressBar.Value = Convert.ToInt32(percentage);
+            progressBar.Value = e.ProgressPercentage;
+            string downloaded = Math.Round(e.BytesReceived / 1024d / 1024d, 2).ToString() + " MB";
+            string total = Math.Round(e.TotalBytesToReceive / 1024d / 1024d, 2).ToString() + " MB";
+            labelMessage.Text = $"Downloaded {downloaded} of {total}";
         }
 
         void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
@@ -141,7 +138,7 @@ namespace EZBlocker2
 
                         updateFile += ".zip";
                         updateFullFile = Application.StartupPath + $@"\{updateFile}";
-                                                
+
                         address = new Uri(response.ResponseUri.OriginalString.Replace("/tag/", "/download/") + $"/{updateFile}");
                     }
 
@@ -160,7 +157,7 @@ namespace EZBlocker2
 
                         changelog = changelog.Replace("<li>", "- ").Replace("</li>", "");
                     }
-                    
+
                     if (address != null && MessageBox.Show($"A newer version of EZBlocker 2 has been found!\r\nWould you like to update? ({scurrent} to {slatest}){changelog}", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
                     {
                         StartDownload();
