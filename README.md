@@ -50,6 +50,13 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.2.1:
+- Improved update form
+- Added tooltip for errors
+- Added detection of .NET Framework 4.5
+- Removed useless using directive
+- Fixed version number
+
 Version 2.1.2.0:
 - Added info message when you enable/disable hosts patches
 - Revert 'Downgraded .NET Framework to v4.0'
