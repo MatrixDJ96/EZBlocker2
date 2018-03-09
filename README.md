@@ -50,6 +50,10 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.2.2:
+- Updated hosts patches
+- Fixed some weird title/artist/album song
+
 Version 2.1.2.1:
 - Improved update form
 - Added tooltip for errors
