@@ -61,7 +61,6 @@ namespace EZBlocker2
             "ds.serving-sys.com",
             "gew1.ap.spotify.com",
             "googleadapis.l.google.com",
-            "googleadapis.l.google.com",
             "googleads.g.doubleclick.net",
             "googleads4.g.doubleclick.net",
             "googleadservices.com",
@@ -82,8 +81,6 @@ namespace EZBlocker2
             "server-54-230-216-203.mrs50.r.cloudfront.net",
             "tpc.googlesyndication.com",
             "u.scdn.co",
-            "upgrade.scdn.co",
-            "upgrade.spotify.com",
             "v.jwpcdn.com",
             "video-ad-stats.googlesyndication.com",
             "weblb-wg.gslb.spotify.com",
@@ -92,12 +89,22 @@ namespace EZBlocker2
             "www.omaze.com"
         };
 
-        private readonly string[] oldHostsPatches = {
+        // Hosts patches (wrong)
+        private readonly string[] otherHostsPatches = {
             "ads.pubmatic.com",
             "apresolve.spotify.com",
+            "fastly.net",
             "gads.pubmatic.com",
             "pubads.g.doubleclisck.net",
-            "spclient.wg.spotify.com"
+            "spclient.wg.spotify.com",
+            "t.scdn.co",
+            // Spotify Update
+            "beta.spotify.map.fastly.net",
+            "prod.spotify.map.fastlylb.net",
+            "upgrade.scdn.co",
+            "upgrade.spotify.com",
+            "sto3-accesspoint-a88.sto3.spotify.net",
+            "www.spotify-desktop.com"
         };
 
         // Form movement
@@ -326,7 +333,7 @@ namespace EZBlocker2
                     }
 
                     // delete wrong patches
-                    foreach (string patch in oldHostsPatches)
+                    foreach (string patch in otherHostsPatches)
                     {
                         if (tmp.ToLower().Contains(" " + patch) && tmp.EndsWith(patch, comp))
                         {
