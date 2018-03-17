@@ -112,10 +112,8 @@ namespace EZBlocker2
         private Point dragCursorPoint;
         private Point dragFormPoint;
 
-        // Spotify system volume variables
+        // Spotify system volume variable
         private bool muted = false;
-        private readonly int maxWait = 3;
-        private int wait = 3; // same as maxWait
 
         // Useful booleans
         private bool winStoreApp = false;
@@ -127,7 +125,7 @@ namespace EZBlocker2
         private int countdown = 30; // seconds
 
         // Label message
-        private string[] message; // useful to store info
+        private string[] message = { "", "", "" }; // useful to store info
 
         // Listener
         private CustomListener listener;
@@ -156,12 +154,17 @@ namespace EZBlocker2
         {
             if (text.Length > 35)
                 text = text.Substring(0, 35) + "...";
-            if (!labelMessage.Text.Equals(text))
+
+            if (!message[0].Equals(text))
                 labelMessage.Text = text;
-            if (!toolTip.GetToolTip(labelMessage).Equals(hint))
+
+            if (!message[1].Equals(hint))
                 toolTip.SetToolTip(labelMessage, hint);
-            if (!toolTip.GetToolTip(imgSong).Equals(album))
+
+            if (!message[2].Equals(album))
                 toolTip.SetToolTip(imgSong, album);
+
+            message = new[] { text, hint, album };
         }
 
         private void HideEZBlocker()
@@ -234,17 +237,7 @@ namespace EZBlocker2
         private void Mute(bool enable)
         {
             if (muted == enable)
-            {
                 return;
-            }
-
-            if (wait > 0)
-            {
-                wait--;
-                return;
-            }
-            else
-                wait = maxWait;
 
             muted = enable;
 
@@ -575,59 +568,51 @@ namespace EZBlocker2
         private void TimerStatus_Tick(object sender, EventArgs e)
         {
             timerStatus.Enabled = false; // wait...
-            timerStatus.Interval = 500;
-
             Spotilocal.GetStatus();
         }
 
         internal void Main_Status(SpotilocalStatus status)
         {
             bool enable = true; // start?
-            message = new[] { labelMessage.Text, toolTip.GetToolTip(labelMessage) };
 
-            if (Spotilocal.InnerMessage != Spotilocal.Hooking)
+            if (!status.IsError)
             {
-                if (!status.IsError)
-                {
-                    if (status.IsPrivateSession)
-                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
-                    else
-                    {
-                        if (status.IsPlaying)
-                        {
-                            Mute(status.IsAd && checkBoxMuteAds.Checked);
-                            if (status.IsAd)
-                            {
-                                if (checkBoxMuteAds.Checked)
-                                    ShowMessage("Muting: Ad");
-                                else
-                                    ShowMessage("Playing: Ad");
-                            }
-                            else
-                                ShowMessage("Playing: " + status.Track.Song, "Artist: " + status.Track.Artist, "Album: " + status.Track.Album);
-                        }
-                        else
-                            ShowMessage("Spotify is in pause");
-                    }
-                }
+                if (status.IsPrivateSession)
+                    ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
                 else
                 {
-                    if (!IsSpotifyRunning())
+                    if (status.IsPlaying)
                     {
-                        enable = false; // stop!
-                        MinimizeEZBlocker();
-                        notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                        CloseEZBlocker(3000);
+                        Mute(status.IsAd && checkBoxMuteAds.Checked);
+                        if (status.IsAd)
+                        {
+                            if (checkBoxMuteAds.Checked)
+                                ShowMessage("Muting: Ad");
+                            else
+                                ShowMessage("Playing: Ad");
+                        }
+                        else
+                            ShowMessage("Playing: " + status.Track.Song, "Artist: " + status.Track.Artist, "Album: " + status.Track.Album);
                     }
                     else
-                    {
-                        string text = "Error: " + status.Message;
-                        ShowMessage(text, text);
-                    }
+                        ShowMessage("Spotify is in pause");
                 }
             }
             else
-                ShowMessage(status.Message);
+            {
+                if (!IsSpotifyRunning())
+                {
+                    enable = false; // stop!
+                    MinimizeEZBlocker();
+                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                    CloseEZBlocker(3000);
+                }
+                else
+                {
+                    string text = "Error: " + status.Message;
+                    ShowMessage(text, text);
+                }
+            }
 
             if (enable)
                 timerStatus.Enabled = true; // go!
