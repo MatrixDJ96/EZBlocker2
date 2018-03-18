@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Timers;
 using static EZBlocker2.Program;
 
 namespace EZBlocker2
@@ -14,6 +13,9 @@ namespace EZBlocker2
         private static readonly string user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0";
         private static readonly string open_spotify = "https://open.spotify.com";
         private static readonly string localhost = "http://127.0.0.1";
+
+        private static readonly int timeout = 3000;
+        public static int Timeout => timeout;
 
         private static int port = 0;
 
@@ -54,7 +56,8 @@ namespace EZBlocker2
 
         private static async void GetPort()
         {
-            CustomWebClient client = new CustomWebClient();
+            WebClient client = new CustomWebClient();
+            ((CustomWebClient)client).Timeout = 50;
 
             int i_port = 4370;
             int f_port = 4390;
@@ -63,7 +66,6 @@ namespace EZBlocker2
             {
                 try
                 {
-                    client.Timeout = 10;
                     var page = await client.DownloadDataTaskAsync(new Uri(localhost + ":" + i_port.ToString()));
                 }
                 catch (Exception ex)
@@ -87,9 +89,9 @@ namespace EZBlocker2
 
         private static void GetCSRF()
         {
-            WebClient client = new WebClient();
+            WebClient client = new CustomWebClient();
+            ((CustomWebClient)client).Timeout = timeout;
             client.Headers.Add("Origin", open_spotify);
-            // TODO: add timeout
 
             client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(CsrfToken));
             client.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/simplecsrf/token.json"));
@@ -97,9 +99,9 @@ namespace EZBlocker2
 
         private static void GetOAuth()
         {
-            WebClient client = new WebClient();
+            WebClient client = new CustomWebClient();
+            ((CustomWebClient)client).Timeout = timeout;
             client.Headers.Add("User-Agent", user_agent);
-            // TODO: add timeout
 
             client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(OAuthToken));
             client.DownloadDataAsync(new Uri(open_spotify + "/token"));
@@ -118,9 +120,9 @@ namespace EZBlocker2
                 return;
             }
 
-            WebClient client = new WebClient();
+            WebClient client = new CustomWebClient();
+            ((CustomWebClient)client).Timeout = timeout;
             client.Headers.Add("Origin", open_spotify);
-            // TODO: add timeout
 
             client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(SpotilocalStatus));
             client.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
