@@ -86,7 +86,14 @@ namespace EZBlocker2
             "weblb-wg.gslb.spotify.com",
             "www.googleadservices.com",
             "www.googletagservices.com",
-            "www.omaze.com"
+            "www.omaze.com",
+            // Spotify Update
+            "beta.spotify.map.fastly.net",
+            "prod.spotify.map.fastlylb.net",
+            "upgrade.scdn.co",
+            "upgrade.spotify.com",
+            "sto3-accesspoint-a88.sto3.spotify.net",
+            "www.spotify-desktop.com"
         };
 
         // Hosts patches (wrong)
@@ -97,14 +104,7 @@ namespace EZBlocker2
             "gads.pubmatic.com",
             "pubads.g.doubleclisck.net",
             "spclient.wg.spotify.com",
-            "t.scdn.co",
-            // Spotify Update
-            "beta.spotify.map.fastly.net",
-            "prod.spotify.map.fastlylb.net",
-            "upgrade.scdn.co",
-            "upgrade.spotify.com",
-            "sto3-accesspoint-a88.sto3.spotify.net",
-            "www.spotify-desktop.com"
+            "t.scdn.co"
         };
 
         // Form movement
@@ -193,8 +193,10 @@ namespace EZBlocker2
         private void CloseEZBlocker(int timeout = 0)
         {
             exiting = true;
+
             if (timeout != 0)
                 Thread.Sleep(5000);
+
             Application.Exit();
         }
 
@@ -249,12 +251,7 @@ namespace EZBlocker2
                     for (int i = 0; i < sessions.Count; i++)
                     {
                         if (sessions[i].GetSessionIdentifier.ToLower().Contains("spotify"))
-                        {
-                            if (muted)
-                                sessions[i].SimpleAudioVolume.Mute = true;
-                            else
-                                sessions[i].SimpleAudioVolume.Mute = false;
-                        }
+                            sessions[i].SimpleAudioVolume.Mute = muted;
                     }
                 }
             }
@@ -691,6 +688,9 @@ namespace EZBlocker2
 
         private void CheckBoxBlockAds_CheckedChanged(object sender, EventArgs e)
         {
+            if (checkBoxBlockAds.Checked)
+                MessageBox.Show("Automatic update for Spotify will be disabled.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
             try
             {
                 Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
