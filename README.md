@@ -25,6 +25,7 @@ Mute ads:
 
 Block ads:
 - To prevent ads on Spotify from loading EZBlocker 2 must apply <b>hosts patches</b> on your system. These patches to be applied should require administrator rights.
+- Enabling this option will be disabled automatic update for Spotify!
 
 ### Error reporting
 
@@ -49,6 +50,14 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 #
 
 ### Changelog
+
+Version 2.1.2.3:
+- Improved Spotify port detection
+- Fixed minor bugs
+- Added Spotilocal timeout
+- Updated hosts patches
+- Added warning when enabling hosts patches
+- Fixed issue #6 (1st second or half second of ads is not muted)
 
 Version 2.1.2.2:
 - Updated hosts patches
