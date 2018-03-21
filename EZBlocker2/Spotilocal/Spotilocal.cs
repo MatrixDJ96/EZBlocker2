@@ -10,21 +10,29 @@ namespace EZBlocker2
 {
     internal class Spotilocal
     {
-        private static readonly string user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:58.0) Gecko/20100101 Firefox/58.0";
+        private static readonly string user_agent = "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0";
         private static readonly string open_spotify = "https://open.spotify.com";
         private static readonly string localhost = "http://127.0.0.1";
-
-        private static readonly int timeout = 3000;
-        public static int Timeout => timeout;
-
+        
         private static int port = 0;
 
-        private static string oauth;
-        private static string csrf;
+        private static string oauth = null;
+        private static string csrf = null;
 
-        public static CustomEmitter emitter = new CustomEmitter();
+        private static WebClient clientSecondary = null;
+        private static WebClient clientPrimary = null;
 
-        private static void Client_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e, Type type = null)
+        public static CustomEmitter emitter = null;
+
+        static Spotilocal()
+        {
+            InitializeClient(ref clientPrimary, typeof(SpotilocalStatus));
+            ((CustomWebClient)clientPrimary).Timeout = timeout;
+
+            emitter = new CustomEmitter();
+        }
+
+        private static void Client_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e, Type type)
         {
             try
             {
@@ -32,12 +40,14 @@ namespace EZBlocker2
                 {
                     string result = Encoding.UTF8.GetString(e.Result);
 
-                    if (type == typeof(CsrfToken) || type == typeof(OAuthToken))
+                    if (type == typeof(CsrfToken))
                     {
-                        if (type == typeof(CsrfToken))
-                            csrf = JsonConvert.DeserializeObject<CsrfToken>(result).Token;
-                        else if (type == typeof(OAuthToken))
-                            oauth = JsonConvert.DeserializeObject<OAuthToken>(result).T;
+                        csrf = JsonConvert.DeserializeObject<CsrfToken>(result).Token;
+                        GetStatus();
+                    }
+                    else if (type == typeof(OAuthToken))
+                    {
+                        oauth = JsonConvert.DeserializeObject<OAuthToken>(result).T;
                         GetStatus();
                     }
                     else if (type == typeof(SpotilocalStatus))
@@ -54,10 +64,20 @@ namespace EZBlocker2
             }
         }
 
+        private static void InitializeClient(ref WebClient client, Type type = null)
+        {
+            client = new CustomWebClient();
+            client.Headers.Add("Origin", open_spotify);
+            client.Headers.Add("User-Agent", user_agent);
+
+            if (type != null)
+                client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, type);
+        }
+
         private static async void GetPort()
         {
-            WebClient client = new CustomWebClient();
-            ((CustomWebClient)client).Timeout = 50;
+            InitializeClient(ref clientSecondary);
+            ((CustomWebClient)clientSecondary).Timeout = 50;
 
             int i_port = 4370;
             int f_port = 4390;
@@ -66,12 +86,11 @@ namespace EZBlocker2
             {
                 try
                 {
-                    var page = await client.DownloadDataTaskAsync(new Uri(localhost + ":" + i_port.ToString()));
+                    var page = await clientSecondary.DownloadDataTaskAsync(new Uri(localhost + ":" + i_port.ToString()));
                 }
-                catch (Exception ex)
+                catch (WebException ex)
                 {
-                    WebException webException = (WebException)ex;
-                    if (webException.Status == WebExceptionStatus.ProtocolError)
+                    if (ex.Status == WebExceptionStatus.ProtocolError)
                         break;
                     else
                         i_port++;
@@ -89,43 +108,30 @@ namespace EZBlocker2
 
         private static void GetCSRF()
         {
-            WebClient client = new CustomWebClient();
-            ((CustomWebClient)client).Timeout = timeout;
-            client.Headers.Add("Origin", open_spotify);
+            InitializeClient(ref clientSecondary, typeof(CsrfToken));
+            ((CustomWebClient)clientSecondary).Timeout = timeout;
 
-            client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(CsrfToken));
-            client.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/simplecsrf/token.json"));
+            clientSecondary.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/simplecsrf/token.json"));
         }
 
         private static void GetOAuth()
         {
-            WebClient client = new CustomWebClient();
-            ((CustomWebClient)client).Timeout = timeout;
-            client.Headers.Add("User-Agent", user_agent);
+            InitializeClient(ref clientSecondary, typeof(OAuthToken));
+            ((CustomWebClient)clientSecondary).Timeout = timeout;
 
-            client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(OAuthToken));
-            client.DownloadDataAsync(new Uri(open_spotify + "/token"));
+            clientSecondary.DownloadDataAsync(new Uri(open_spotify + "/token"));
         }
 
         public static void GetStatus()
         {
-            if (port == 0 || csrf == null || oauth == null)
-            {
-                if (port == 0)
-                    GetPort();
-                else if (csrf == null)
-                    GetCSRF();
-                else if (oauth == null)
-                    GetOAuth();
-                return;
-            }
-
-            WebClient client = new CustomWebClient();
-            ((CustomWebClient)client).Timeout = timeout;
-            client.Headers.Add("Origin", open_spotify);
-
-            client.DownloadDataCompleted += (sender, e) => Client_DownloadDataCompleted(sender, e, typeof(SpotilocalStatus));
-            client.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
+            if (port == 0)
+                GetPort();
+            else if (csrf == null)
+                GetCSRF();
+            else if (oauth == null)
+                GetOAuth();
+            else
+                clientPrimary.DownloadDataAsync(new Uri(localhost + ":" + port.ToString() + "/remote/status.json" + "?csrf=" + csrf + "&oauth=" + oauth));
         }
 
         public static void WriteLog(Exception ex)

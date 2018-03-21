@@ -23,6 +23,9 @@ namespace EZBlocker2
         public static readonly string ezBlockerExe = Path.GetFileName(ezBlockerFullExe);
         public static readonly string ezBlockerLog = Path.GetFileNameWithoutExtension(ezBlockerFullExe) + ".log";
 
+        // Timeout
+        public static int timeout = 3000;
+
         // StringComparison
         public static StringComparison comp = StringComparison.OrdinalIgnoreCase;
 
