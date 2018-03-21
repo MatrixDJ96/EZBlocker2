@@ -6,9 +6,16 @@ namespace EZBlocker2
 {
     class CustomWebClient : WebClient
     {
-        private int timeout = 0;
+        private int timeout = 60000;
         private Timer timer = null;
         private ElapsedEventHandler handler = null;
+
+        public CustomWebClient()
+        {
+            timer = new Timer(timeout);
+            handler = Timer_Timeout;
+            timer.Elapsed += handler;
+        }
 
         public int Timeout
         {
@@ -18,8 +25,7 @@ namespace EZBlocker2
 
         private void Timer_Timeout(object sender, ElapsedEventArgs e)
         {
-            timer = null;
-            handler = null;
+            timer.Stop();
             CancelAsync();
         }
 
@@ -33,11 +39,10 @@ namespace EZBlocker2
                 request.Timeout = timeout;
 
                 // Async timeout
-                timer = new Timer(timeout);
-                handler = Timer_Timeout;
-
-                timer.Elapsed += handler;
-                timer.Enabled = true;
+                if (timer.Interval != timeout)
+                    timer.Interval = timeout;
+                
+                timer.Start();
             }
 
             return request;
