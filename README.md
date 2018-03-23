@@ -51,6 +51,9 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.2.4:
+-  Fixed memory leak (issue #10, #9)
+
 Version 2.1.2.3:
 - Improved Spotify port detection
 - Fixed minor bugs
