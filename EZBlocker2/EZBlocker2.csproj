@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HostsPatches.cs" />
     <Compile Include="Custom\CustomEmitter.cs" />
     <Compile Include="Custom\CustomListener.cs" />
     <Compile Include="Custom\CustomProfessionalColorTable.cs" />

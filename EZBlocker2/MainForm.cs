@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using static EZBlocker2.Program;
+using static EZBlocker2.HostsPatches;
 
 namespace EZBlocker2
 {
@@ -35,77 +36,6 @@ namespace EZBlocker2
         private readonly string developer_website = "https://github.com/MatrixDJ96";
         private readonly string original_website = "https://github.com/Xeroday/Spotify-Ad-Blocker";
         private readonly string designer_website = "https://github.com/Bruske";
-
-        // Hosts patches
-        private readonly string[] hostsPatches = {
-            "adclick.g.doublecklick.net",
-            "adeventtracker.spotify.com",
-            "adnxs.com",
-            "adnxs.comadplexmedia.adk2x.com",
-            "ads-fa.spotify.com",
-            "ads.spotify.com",
-            "analytics.spotify.com",
-            "audio-sp-sto.spotify.com",
-            "audio2.spotify.com",
-            "b.scorecardresearch.com",
-            "bounceexchange.com",
-            "bs.serving-sys.com",
-            "content.bitsontherun.com",
-            "core.insightexpressai.com",
-            "crashdump.spotify.com",
-            "cs126.wpc.edgecastcdn.net",
-            "d2gi7ultltnc2u.cloudfront.net",
-            "d3rt1990lpmkn.cloudfront.net",
-            "desktop.spotify.com",
-            "doubleclick.net",
-            "ds.serving-sys.com",
-            "gew1.ap.spotify.com",
-            "googleadapis.l.google.com",
-            "googleads.g.doubleclick.net",
-            "googleads4.g.doubleclick.net",
-            "googleadservices.com",
-            "gtssl2-ocsp.geotrust.com",
-            "js.moatads.com",
-            "log.spotify.com",
-            "lon6-accesspoint-a33.lon6.spotify.com",
-            "media-match.com",
-            "omaze.com",
-            "pagead2.googlesyndication.com",
-            "pagead46.l.doubleclick.net",
-            "partner.googleadservices.com",
-            "pubads.g.doubleclick.net",
-            "redirector.gvt1.com",
-            "s0.2mdn.net",
-            "securepubads.g.doubleclick.net",
-            "seen-on-screen.thewhizmarketing.com",
-            "server-54-230-216-203.mrs50.r.cloudfront.net",
-            "tpc.googlesyndication.com",
-            "u.scdn.co",
-            "v.jwpcdn.com",
-            "video-ad-stats.googlesyndication.com",
-            "weblb-wg.gslb.spotify.com",
-            "www.googleadservices.com",
-            "www.googletagservices.com",
-            "www.omaze.com",
-            // Spotify Update
-            "beta.spotify.map.fastly.net",
-            "prod.spotify.map.fastlylb.net",
-            "upgrade.scdn.co",
-            "upgrade.spotify.com",
-            "sto3-accesspoint-a88.sto3.spotify.net",
-            "www.spotify-desktop.com"
-        };
-
-        // Hosts patches (wrong)
-        private readonly string[] otherHostsPatches = {
-            "ads.pubmatic.com",
-            "apresolve.spotify.com",
-            "fastly.net",
-            "gads.pubmatic.com",
-            "pubads.g.doubleclisck.net",
-            "spclient.wg.spotify.com",
-            "t.scdn.co"
-        };
 
         // Form movement
         private bool dragging = false;
@@ -323,7 +253,7 @@ namespace EZBlocker2
                     }
 
                     // delete wrong patches
-                    foreach (string patch in otherHostsPatches)
+                    foreach (string patch in wrongHostsPatches)
                     {
                         if (tmp.ToLower().Contains(" " + patch) && tmp.EndsWith(patch, comp))
                         {
