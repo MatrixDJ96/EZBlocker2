@@ -156,6 +156,14 @@ namespace EZBlocker2
                 File.Delete(path);
         }
 
+        public static string MyTrim(string str)
+        {
+            string tmp = str.Replace("\t", "");
+            while (tmp.Contains("  "))
+                tmp = tmp.Replace("  ", " ");
+            return tmp;
+        }
+
         [STAThread]
         static void Main()
         {

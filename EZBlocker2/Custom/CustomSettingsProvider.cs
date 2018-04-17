@@ -12,69 +12,6 @@ namespace EZBlocker2
     {
         private readonly string ezBlockerSettings = ezBlockerFullExe.Substring(0, ezBlockerFullExe.Length - 4) + ".ini";
 
-        private string GetValue(SettingsProperty property)
-        {
-            string line = null;
-            if (File.Exists(ezBlockerSettings))
-            {
-                string propertyName = property.Name.ToLower();
-                List<string> lines = new List<string>(File.ReadAllLines(ezBlockerSettings));
-                line = lines.Find(x => x.ToLower().Contains(propertyName));
-                if (line != null)
-                {
-                    line = line.Replace(propertyName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).ToLower();
-                    if (line != "false" && line != "true")
-                        line = null;
-                }
-            }
-            return line ?? property.DefaultValue.ToString();
-        }
-
-        private void SetValue(SettingsPropertyValue value)
-        {
-            string valueName = value.Name.ToLower();
-            string newValue = value.SerializedValue.ToString().ToLower();
-
-            string[] currentLines = null;
-            if (!File.Exists(ezBlockerSettings))
-                currentLines = new string[0];
-            else
-                currentLines = File.ReadAllLines(ezBlockerSettings);
-
-            for (int i = 0; i < currentLines.Length; i++)
-                currentLines[i] = currentLines[i].ToLower();
-
-            List<string> newLines = new List<string>(currentLines);
-            bool found = false;
-
-            for (int i = 0; i < currentLines.Length; i++)
-            {
-                if (currentLines[i].Contains(valueName))
-                {
-                    if (!currentLines[i].Replace(valueName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).Equals(newValue))
-                        newLines[i] = valueName + "=" + newValue;
-                    found = true;
-                }
-            }
-
-            if (found)
-            {
-                for (int i = 0; i < newLines.Count; i++)
-                {
-                    if (!newLines[i].Equals(currentLines[i]))
-                    {
-                        File.WriteAllLines(ezBlockerSettings, newLines);
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                newLines.Add(valueName + "=" + newValue);
-                File.WriteAllLines(ezBlockerSettings, newLines);
-            }
-        }
-
         public override void Initialize(string name, NameValueCollection config) => base.Initialize(ApplicationName, config);
 
         public override string ApplicationName
@@ -89,13 +26,37 @@ namespace EZBlocker2
         {
             SettingsPropertyValueCollection settingsPropertyValueCollection = new SettingsPropertyValueCollection();
 
-            foreach (SettingsProperty property in collection)
+            try
             {
-                SettingsPropertyValue value = new SettingsPropertyValue(property)
+                List<string> lines = null;
+                if (File.Exists(ezBlockerSettings))
+                    lines = new List<string>(File.ReadAllLines(ezBlockerSettings));
+
+                foreach (SettingsProperty property in collection)
                 {
-                    SerializedValue = GetValue(property)
-                };
-                settingsPropertyValueCollection.Add(value);
+                    string propertyName = property.Name.ToLower();
+                    object value = null;
+
+                    if (lines != null)
+                    {
+                        string line = lines.Find(x => x.ToLower().Contains(propertyName));
+                        if (line != null)
+                            value = line.Replace(propertyName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).ToLower();
+                    }
+
+                    SettingsPropertyValue propertyValue = new SettingsPropertyValue(property)
+                    {
+                        SerializedValue = value ?? property.DefaultValue ?? ""
+                    };
+
+                    settingsPropertyValueCollection.Add(propertyValue);
+                }
+
+            }
+            catch
+            {
+                MessageBox.Show("Error while reading settings...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw new Exception();
             }
 
             return settingsPropertyValueCollection;
@@ -103,13 +64,39 @@ namespace EZBlocker2
 
         public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection)
         {
-            SettingsPropertyValue workingValue = null;
             try
             {
+                List<string> currentLines = null;
+                if (File.Exists(ezBlockerSettings))
+                    currentLines = new List<string>(File.ReadAllLines(ezBlockerSettings));
+
+                List<string> newLines = new List<string>();
+
+                bool write = false;
+
                 foreach (SettingsPropertyValue value in collection)
                 {
-                    workingValue = value;
-                    SetValue(workingValue);
+                    string valueName = value.Name.ToLower();
+                    string newValue = value.SerializedValue.ToString().ToLower();
+
+                    string line = null;
+                    if (currentLines != null)
+                    {
+                        line = currentLines.Find(x => x.ToLower().Contains(valueName));
+                        if (line != null)
+                            line = line.Replace(valueName, "").Replace("=", "").Trim(new[] { ' ', '\t' }).ToLower();
+                    }
+
+                    if (line == null || line != newValue)
+                        write = true;
+
+                    newLines.Add(valueName + "=" + newValue);
+                }
+
+                if (write)
+                {
+                    newLines.Sort();
+                    File.WriteAllLines(ezBlockerSettings, newLines);
                 }
             }
             catch

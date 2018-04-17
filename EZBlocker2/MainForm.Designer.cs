@@ -245,9 +245,6 @@ namespace EZBlocker2
             this.titleLabel.TabIndex = 0;
             this.titleLabel.Text = "EZBlocker 2";
             this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.titleLabel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
-            this.titleLabel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseMove);
-            this.titleLabel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseUp);
             // 
             // panelMain
             // 
@@ -289,9 +286,6 @@ namespace EZBlocker2
             this.imgEZBlockerLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.imgEZBlockerLogo.TabIndex = 0;
             this.imgEZBlockerLogo.TabStop = false;
-            this.imgEZBlockerLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
-            this.imgEZBlockerLogo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseMove);
-            this.imgEZBlockerLogo.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseUp);
             // 
             // panelContainer
             // 
@@ -313,9 +307,6 @@ namespace EZBlocker2
             this.panelContainer.Name = "panelContainer";
             this.panelContainer.Size = new System.Drawing.Size(600, 206);
             this.panelContainer.TabIndex = 0;
-            this.panelContainer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
-            this.panelContainer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseMove);
-            this.panelContainer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseUp);
             // 
             // linkLabelDesigner
             // 
@@ -385,9 +376,6 @@ namespace EZBlocker2
             this.labelMessage.TabIndex = 0;
             this.labelMessage.Text = "Loading EZBlocker 2...";
             this.labelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.labelMessage.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
-            this.labelMessage.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseMove);
-            this.labelMessage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseUp);
             // 
             // panelSeparatorUp
             // 
@@ -463,7 +451,7 @@ namespace EZBlocker2
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "EZBlocker 2";
             this.Load += new System.EventHandler(this.Main_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);

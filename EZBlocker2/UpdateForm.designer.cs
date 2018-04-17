@@ -83,9 +83,6 @@
             this.titleLabel.TabIndex = 0;
             this.titleLabel.Text = "Updater";
             this.titleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.titleLabel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseDown);
-            this.titleLabel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseMove);
-            this.titleLabel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseUp);
             // 
             // panelMain
             // 
@@ -108,9 +105,6 @@
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(320, 25);
             this.progressBar.TabIndex = 3;
-            this.progressBar.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseDown);
-            this.progressBar.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseMove);
-            this.progressBar.MouseUp += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseUp);
             // 
             // labelMessage
             // 
@@ -124,9 +118,6 @@
             this.labelMessage.TabIndex = 2;
             this.labelMessage.Text = "Starting download...";
             this.labelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.labelMessage.MouseDown += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseDown);
-            this.labelMessage.MouseMove += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseMove);
-            this.labelMessage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.UpdateForm_MouseUp);
             // 
             // UpdateForm
             // 
