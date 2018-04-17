@@ -51,6 +51,13 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.2.5:
+- Implemented save location on the screen
+- Added CTRL key to center location on the screen
+- Fixed commit 8d43ec8
+- Updated hosts patches
+- Bug fixes and general optimization
+
 Version 2.1.2.4:
 -  Fixed memory leak (issue #10, #9)
 
