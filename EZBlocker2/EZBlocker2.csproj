@@ -64,9 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Custom\CustomMovement.cs" />
     <Compile Include="HostsPatches.cs" />
     <Compile Include="Custom\CustomEmitter.cs" />
-    <Compile Include="Custom\CustomListener.cs" />
     <Compile Include="Custom\CustomProfessionalColorTable.cs" />
     <Compile Include="Custom\CustomSettingsProvider.cs" />
     <Compile Include="Custom\CustomToolStripRenderer.cs" />

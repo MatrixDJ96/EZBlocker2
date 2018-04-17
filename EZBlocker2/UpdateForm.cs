@@ -27,9 +27,7 @@ namespace EZBlocker2
         private int icurrent = 0;
 
         // Form movement
-        private bool dragging = false;
-        private Point dragCursorPoint;
-        private Point dragFormPoint;
+        private CustomMovement movement;
 
         void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -96,6 +94,10 @@ namespace EZBlocker2
         public UpdateForm()
         {
             InitializeComponent();
+
+            movement = new CustomMovement(this);
+            movement.Exclude(typeof(Button));
+            movement.SetMovement(Controls);
         }
 
         private void UpdateForm_Load(object sender, EventArgs e)
@@ -168,25 +170,7 @@ namespace EZBlocker2
             catch { }
             Close();
         }
-
-        private void UpdateForm_MouseDown(object sender, MouseEventArgs e)
-        {
-            dragging = true;
-            dragCursorPoint = Cursor.Position;
-            dragFormPoint = Location;
-        }
-
-        private void UpdateForm_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (dragging)
-            {
-                Point dif = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-                Location = Point.Add(dragFormPoint, new Size(dif));
-            }
-        }
-
-        private void UpdateForm_MouseUp(object sender, MouseEventArgs e) => dragging = false;
-
+        
         private void BtnExit_Click(object sender, EventArgs e)
         {
             if (client != null)

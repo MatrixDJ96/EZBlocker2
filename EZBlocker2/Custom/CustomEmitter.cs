@@ -5,6 +5,7 @@ namespace EZBlocker2
     internal class CustomEmitter
     {
         private SpotilocalStatus status;
+
         public SpotilocalStatus Status
         {
             get { return status; }
@@ -14,11 +15,9 @@ namespace EZBlocker2
                 OnNewStatus(status);
             }
         }
+
         public event Action<SpotilocalStatus> NewStatus;
 
-        public void OnNewStatus(SpotilocalStatus status)
-        {
-            NewStatus(status);
-        }
+        public void OnNewStatus(SpotilocalStatus status) => NewStatus(status);
     }
 }

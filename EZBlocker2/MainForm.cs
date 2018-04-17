@@ -37,10 +37,9 @@ namespace EZBlocker2
         private readonly string original_website = "https://github.com/Xeroday/Spotify-Ad-Blocker";
         private readonly string designer_website = "https://github.com/Bruske";
 
-        // Form movement
-        private bool dragging = false;
-        private Point dragCursorPoint;
-        private Point dragFormPoint;
+        // Form movement and location
+        private CustomMovement movement;
+        private Point centerLocation;
 
         // Spotify system volume variable
         private bool muted = false;
@@ -57,13 +56,31 @@ namespace EZBlocker2
         // Label message
         private string[] message = { "", "", "" }; // useful to store info
 
-        // Listener
-        private CustomListener listener;
-
         /* Constructor */
         public MainForm()
         {
             InitializeComponent();
+
+            try
+            {
+                Point point = new Point(Convert.ToInt32(Properties.Settings.Default.PositionX), Convert.ToInt32(Properties.Settings.Default.PositionY));
+                Location = point;
+            }
+            catch
+            {
+                StartPosition = FormStartPosition.CenterScreen;
+            }
+
+            // set keydown event
+            SetCustomEvent(Controls);
+
+            movement = new CustomMovement(this);
+            movement.NewPosition += SaveLocation;
+
+            movement.Exclude(typeof(Button));
+            movement.Exclude(typeof(CheckBox));
+            movement.Exclude(typeof(LinkLabel));
+            movement.SetMovement(Controls);
 
             contextMenuStrip.Renderer = new CustomToolStripRenderer();
             titleLabel.Text = "v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -80,6 +97,31 @@ namespace EZBlocker2
         }
 
         /* Callable functions */
+        private void SetCustomEvent(Control.ControlCollection collection)
+        {
+            foreach (Control control in collection)
+            {
+                if (control.HasChildren)
+                    SetCustomEvent(control.Controls);
+                else
+                {
+                    if (control is LinkLabel || control is Button)
+                        control.KeyDown += MainForm_KeyDown;
+                }
+            }
+        }
+
+        private void SaveLocation()
+        {
+            try
+            {
+                Properties.Settings.Default.PositionX = Location.X.ToString();
+                Properties.Settings.Default.PositionY = Location.Y.ToString();
+                Properties.Settings.Default.Save();
+            }
+            catch { }
+        }
+
         private void ShowMessage(string text, string hint = "", string album = "")
         {
             if (text.Length > 35)
@@ -207,14 +249,6 @@ namespace EZBlocker2
                         key.SetValue(name, new byte[] { 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, RegistryValueKind.Binary);
                 }
             }
-        }
-
-        private string MyTrim(string str)
-        {
-            string tmp = str.Replace("\t", "");
-            while (tmp.Contains("  "))
-                tmp = tmp.Replace("  ", " ");
-            return tmp;
         }
 
         private bool BlockAds(bool loading = false)
@@ -466,6 +500,16 @@ namespace EZBlocker2
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
+            if (StartPosition == FormStartPosition.CenterScreen)
+                centerLocation = Location;
+            else
+            {
+                int x = (Screen.PrimaryScreen.WorkingArea.Width / 2) - (Width / 2);
+                int y = (Screen.PrimaryScreen.WorkingArea.Height / 2) - (Height / 2);
+
+                centerLocation = new Point(x, y);
+            }
+
             if (Properties.Settings.Default.StartMinimized)
                 MinimizeEZBlocker();
         }
@@ -474,12 +518,11 @@ namespace EZBlocker2
         {
             timerSleep.Interval = 1000;
 
-            if (IsSpotifyRunning() || countdown == 0)
+            if (IsSpotifyRunning())
             {
                 timerSleep.Enabled = false;
 
-                listener = new CustomListener(this);
-                Spotilocal.emitter.NewStatus += listener.StatusHandler;
+                Spotilocal.emitter.NewStatus += Main_Status;
 
                 ShowMessage("Checking Spotify port...");
 
@@ -489,6 +532,10 @@ namespace EZBlocker2
             {
                 ShowMessage("Waiting for Spotify...");
                 countdown--;
+            }
+            else
+            {
+                KillEZBlocker();
             }
         }
 
@@ -545,23 +592,17 @@ namespace EZBlocker2
                 timerStatus.Enabled = true; // go!
         }
 
-        private void MainForm_MouseDown(object sender, MouseEventArgs e)
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            dragging = true;
-            dragCursorPoint = Cursor.Position;
-            dragFormPoint = Location;
-        }
-
-        private void MainForm_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (dragging)
+            if (e.KeyCode == Keys.ControlKey)
             {
-                Point dif = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-                Location = Point.Add(dragFormPoint, new Size(dif));
+                if (MessageBox.Show("Do you want to move EZBlocker in the middle of the screen?", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    Location = centerLocation;
+                    SaveLocation();
+                }
             }
         }
-
-        private void MainForm_MouseUp(object sender, MouseEventArgs e) => dragging = false;
 
         private void BtnMinimize_Click(object sender, EventArgs e) => MinimizeEZBlocker();
 
@@ -604,7 +645,6 @@ namespace EZBlocker2
             {
                 Properties.Settings.Default.MuteAds = checkBoxMuteAds.Checked;
                 Properties.Settings.Default.Save();
-
             }
             catch
             {
@@ -625,18 +665,13 @@ namespace EZBlocker2
             {
                 Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
 
-                if (!BlockAds())
-                {
-                    Properties.Settings.Default.BlockAds = !checkBoxBlockAds.Checked;
-                    checkBoxBlockAds.CheckedChanged -= new EventHandler(CheckBoxBlockAds_CheckedChanged);
-                    checkBoxBlockAds.Checked = Properties.Settings.Default.BlockAds;
-                    checkBoxBlockAds.CheckedChanged += new EventHandler(CheckBoxBlockAds_CheckedChanged);
-                }
-                else
+                if (BlockAds())
                 {
                     MessageBox.Show("It could be necessary to restart Spotify or your computer for this changes to take effect.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Properties.Settings.Default.Save();
                 }
+                else
+                    throw new Exception();
             }
             catch
             {
@@ -653,18 +688,6 @@ namespace EZBlocker2
             {
                 Properties.Settings.Default.StartOnLogin = checkBoxStartOnLogin.Checked;
 
-                if (checkBoxStartOnLogin.Checked)
-                {
-                    checkBoxStartMinimized.Enabled = false;
-                    checkBoxStartMinimized.CheckedChanged -= new EventHandler(CheckBoxStartMinimized_CheckedChanged);
-                    checkBoxStartMinimized.Checked = true;
-                }
-                else
-                {
-                    checkBoxStartMinimized.Enabled = true;
-                    checkBoxStartMinimized.Checked = Properties.Settings.Default.StartMinimized;
-                    checkBoxStartMinimized.CheckedChanged += new EventHandler(CheckBoxStartMinimized_CheckedChanged);
-                }
                 StartOnLogin();
 
                 Properties.Settings.Default.Save();
