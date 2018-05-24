@@ -43,7 +43,7 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 - Eric Zhang for the original [EZBlocker][1]
 - [Bruske][2] for design inspiration
 - Shyyko Serhiy for [spotilocal][3] method
-- Steven Black for [hosts][4] patches
+- FadeMind for [hosts][4] patches
 - Mark Heath for [NAudio][5] library
 - James Newton-King for [Json.NET][6] library
 
