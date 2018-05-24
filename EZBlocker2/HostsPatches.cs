@@ -31,7 +31,6 @@
             "googleads.g.doubleclick.net",
             "googleads4.g.doubleclick.net",
             "googleadservices.com",
-            "googletagmanager.com",
             "gtssl2-ocsp.geotrust.com",
             "js.moatads.com",
             "log.spotify.com",
@@ -60,7 +59,6 @@
             "vt.myvisualiq.net",
             "weblb-wg.gslb.spotify.com",
             "www.googleadservices.com",
-            "www.googletagmanager.com",
             "www.googletagservices.com",
             "www.omaze.com",
         };
@@ -71,11 +69,13 @@
             "apresolve.spotify.com",
             "fastly.net",
             "gads.pubmatic.com",
+            "googletagmanager.com",
             "pubads.g.doubleclisck.net",
             "t.scdn.co",
             "beta.spotify.map.fastly.net",
             "prod.spotify.map.fastlylb.net",
             "sto3-accesspoint-a88.sto3.spotify.net",
+            "www.googletagmanager.com",
             "www.spotify-desktop.com"
         };
     }
