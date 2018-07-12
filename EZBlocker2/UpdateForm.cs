@@ -29,7 +29,7 @@ namespace EZBlocker2
         // Form movement
         private CustomMovement movement;
 
-        void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             progressBar.Value = e.ProgressPercentage;
             string downloaded = Math.Round(e.BytesReceived / 1024d / 1024d, 2).ToString() + " MB";
@@ -37,7 +37,7 @@ namespace EZBlocker2
             labelMessage.Text = $"Downloaded {downloaded} of {total}";
         }
 
-        void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
         {
             if (!e.Cancelled)
             {
