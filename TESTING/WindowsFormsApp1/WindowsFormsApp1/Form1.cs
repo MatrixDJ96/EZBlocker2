@@ -1,9 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Web;
 using System.Windows.Forms;
 using WindowsFormsApp1.JSON;
@@ -16,8 +18,8 @@ namespace WindowsFormsApp1
         private MyWebClient client_auth = null;
         private MyWebClient client_info = null;
 
-        private Form form = null;
-
+        private Form2 form = null;
+        
         public static string code = null;
         public static string redirect_uri = null;
         public static JSON.Authorization auth = null;
@@ -55,48 +57,33 @@ namespace WindowsFormsApp1
 
         private void Form1_Shown(object sender, EventArgs e)
         {
+            MessageBox.Show(Thread.CurrentThread.ManagedThreadId.ToString());
+
             startBtn.PerformClick();
 
-            form = new Form2();
-            form.Show();
+            server.NewUri += GetUriEvent;
+            redirect_uri = Uri.EscapeUriString(server.Address + ":" + server.Port);
 
-            try
-            {
-                redirect_uri = Uri.EscapeUriString(server.Address + ":" + server.Port);
+            NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
 
-                NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
-                
-                data.Add("client_id", "b6058737c9a048ea88a7282b25374c2c");
-                data.Add("response_type", "code");
-                data.Add("redirect_uri", redirect_uri);
-                data.Add("scope", "user-read-currently-playing");
+            data.Add("client_id", "b6058737c9a048ea88a7282b25374c2c");
+            data.Add("response_type", "code");
+            data.Add("redirect_uri", redirect_uri);
+            data.Add("scope", "user-read-currently-playing");
 
-                ((Form2)form).webBrowser1.Navigated += WebBrowser1_Navigated;
-                ((Form2)form).webBrowser1.Navigate("https://accounts.spotify.com/authorize?" + data.ToString());
-            }
-            catch (WebException ex)
-            {
-                StreamReader stream = new StreamReader(ex.Response.GetResponseStream());
-                string response = "";
-                while (stream.Peek() != -1)
-                {
-                    response += stream.ReadLine() + Environment.NewLine;
-                }
-
-                MessageBox.Show(ex.Status.ToString() + Environment.NewLine + response, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            Process.Start("https://accounts.spotify.com/authorize?" + data.ToString());
         }
-
-        private void WebBrowser1_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        
+        private void GetUriEvent(object sender, Uri url)
         {
-            if (e.Url != new Uri("about:blank"))
+            MessageBox.Show(Thread.CurrentThread.ManagedThreadId.ToString());
+
+            if (url != null && url.Query != null)
             {
-                NameValueCollection response = HttpUtility.ParseQueryString(e.Url.Query);
+                NameValueCollection response = HttpUtility.ParseQueryString(url.Query);
 
                 if (response.Get("error") == null && response.Get("code") != null)
                 {
-                    form.Close();
-
                     code = response.Get("code");
 
                     client_auth = new MyWebClient();
@@ -106,15 +93,11 @@ namespace WindowsFormsApp1
                     client_info.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 
                     client_auth.Headers[HttpRequestHeader.Authorization] = "Basic YjYwNTg3MzdjOWEwNDhlYTg4YTcyODJiMjUzNzRjMmM6NzIyMDMzZDA4YTk0NGU2MmI1ODI2ZjFhOTkzNzczNTg=";
-                                        
-                    try
-                    {                        
-                        SetClientAuthorization(client_info, GetClientAuthorization(client_auth));
-                                                
-                        form = new Form3(client_info, client_auth);
-                        form.Show();
 
-                        ((Form3)form).GetINFO();
+                    try
+                    {
+                        SetClientAuthorization(client_info, GetClientAuthorization(client_auth));
+                        new Thread(() => { new Form2(client_info, client_auth).ShowDialog(); }).Start();
                     }
                     catch (WebException ex)
                     {
@@ -134,7 +117,7 @@ namespace WindowsFormsApp1
                 }
             }
         }
-
+        
         public static byte[] GetClientAuthorization(MyWebClient client, bool refresh = false)
         {
             NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);

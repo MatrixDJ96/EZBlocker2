@@ -2,6 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp1
 {
@@ -10,6 +12,8 @@ namespace WindowsFormsApp1
         private HttpListener listener = null;
         private Thread thread = null;
         private bool running = false;
+
+        public event EventHandler<Uri> NewUri;
 
         private int port = -1;
 
@@ -26,7 +30,7 @@ namespace WindowsFormsApp1
             listener.Prefixes.Add(Address + ":" + Port + "/");
         }
 
-        public void Start()
+        public virtual void Start()
         {
             if (!running)
             {
@@ -46,11 +50,9 @@ namespace WindowsFormsApp1
                             try
                             {
                                 HttpListenerContext context = listener.GetContext();
-
-                                string request = GetRequest(context.Request);
-                                SetResponse(context.Response, request);
-
-                                File.AppendAllText("request.log", request + "----------------------" + Environment.NewLine);
+                                SetResponse(context.Response, GetRequest(context.Request));
+                                NewUri(this, context.Request.Url);
+                                MessageBox.Show(Thread.CurrentThread.ManagedThreadId.ToString());
                             }
                             catch { }
                         }
