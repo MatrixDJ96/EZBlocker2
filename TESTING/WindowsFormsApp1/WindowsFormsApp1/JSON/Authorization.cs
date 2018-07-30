@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WindowsFormsApp1.JSON
+﻿namespace WindowsFormsApp1.JSON
 {
-    class AuthorizationCode
+    class Authorization
     {
         public string Access_token { get; set; } = null;
         public string Token_type { get; set; } = null;

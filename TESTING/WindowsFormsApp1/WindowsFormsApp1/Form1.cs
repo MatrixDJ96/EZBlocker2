@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Web;
 using System.Windows.Forms;
 using WindowsFormsApp1.JSON;
@@ -17,9 +15,10 @@ namespace WindowsFormsApp1
         private MyWebServer server = null;
         private MyWebClient client = null;
 
-        private Form2 form = null;
+        private Form form = null;
 
         private string code = null;
+        JSON.Authorization auth = null;
 
         public Form1()
         {
@@ -56,12 +55,11 @@ namespace WindowsFormsApp1
         {
             startBtn.PerformClick();
 
+            form = new Form2();
+            form.Show();
+
             try
-            {
-                form = new Form2();
-
-                form.webBrowser1.Navigated += WebBrowser1_Navigated;
-
+            {                
                 NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
 
                 data.Add("client_id", "b6058737c9a048ea88a7282b25374c2c");
@@ -69,9 +67,8 @@ namespace WindowsFormsApp1
                 data.Add("redirect_uri", Uri.EscapeUriString(server.Address + ":" + server.Port));
                 data.Add("scope", Uri.EscapeDataString("user-read-currently-playing"));
 
-                form.webBrowser1.Navigate("https://accounts.spotify.com/authorize?" + data.ToString());
-
-                form.Show();
+                ((Form2)form).webBrowser1.Navigated += WebBrowser1_Navigated;
+                ((Form2)form).webBrowser1.Navigate("https://accounts.spotify.com/authorize?" + data.ToString());
             }
             catch (WebException ex)
             {
@@ -90,11 +87,9 @@ namespace WindowsFormsApp1
         {
             if (e.Url != new Uri("about:blank"))
             {
-                WebBrowser webBrowser = sender as WebBrowser;
-
                 NameValueCollection response = HttpUtility.ParseQueryString(e.Url.Query);
 
-                if (response.Get("error") == null)
+                if (response.Get("error") == null && response.Get("code") != null)
                 {
                     form.Close();
 
@@ -114,13 +109,14 @@ namespace WindowsFormsApp1
                     {
                         byte[] result = client.UploadValues("https://accounts.spotify.com/api/token", "POST", data);
 
-                        AuthorizationCode auth = JsonConvert.DeserializeObject<AuthorizationCode>(Encoding.UTF8.GetString(result));
+                        auth = JsonConvert.DeserializeObject<JSON.Authorization>(Encoding.UTF8.GetString(result));
                         
                         client.Headers[HttpRequestHeader.Authorization] = auth.Token_type + " " + auth.Access_token;
+                        
+                        form = new Form3(client);
+                        form.Show();
 
-                        result = client.DownloadData("https://api.spotify.com/v1/me/player/currently-playing");
-
-                        MessageBox.Show(Encoding.UTF8.GetString(result), "Response", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ((Form3)form).GetINFO();
                     }
                     catch (WebException ex)
                     {

@@ -72,6 +72,7 @@
             this.Controls.Add(this.startBtn);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.stopBtn);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Form1";
             this.Text = "Form1";
             this.Shown += new System.EventHandler(this.Form1_Shown);
