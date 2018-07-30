@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -36,7 +37,13 @@
             this.artistsLbl = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.adsCb = new System.Windows.Forms.CheckBox();
+            this.privateCb = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.playingCb = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -45,9 +52,9 @@
             this.label1.Location = new System.Drawing.Point(14, 37);
             this.label1.Margin = new System.Windows.Forms.Padding(5);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(61, 13);
+            this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Song name";
+            this.label1.Text = "Song:";
             // 
             // label3
             // 
@@ -55,9 +62,9 @@
             this.label3.Location = new System.Drawing.Point(14, 83);
             this.label3.Margin = new System.Windows.Forms.Padding(5);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 13);
+            this.label3.Size = new System.Drawing.Size(38, 13);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Artists name";
+            this.label3.Text = "Artists:";
             // 
             // label2
             // 
@@ -65,9 +72,9 @@
             this.label2.Location = new System.Drawing.Point(14, 60);
             this.label2.Margin = new System.Windows.Forms.Padding(5);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 13);
+            this.label2.Size = new System.Drawing.Size(41, 13);
             this.label2.TabIndex = 2;
-            this.label2.Text = "Album name";
+            this.label2.Text = "Albulm:";
             // 
             // songLbl
             // 
@@ -75,9 +82,8 @@
             this.songLbl.Location = new System.Drawing.Point(90, 37);
             this.songLbl.Margin = new System.Windows.Forms.Padding(5);
             this.songLbl.Name = "songLbl";
-            this.songLbl.Size = new System.Drawing.Size(61, 13);
+            this.songLbl.Size = new System.Drawing.Size(0, 13);
             this.songLbl.TabIndex = 3;
-            this.songLbl.Text = "Song name";
             // 
             // albumLbl
             // 
@@ -85,9 +91,8 @@
             this.albumLbl.Location = new System.Drawing.Point(90, 60);
             this.albumLbl.Margin = new System.Windows.Forms.Padding(5);
             this.albumLbl.Name = "albumLbl";
-            this.albumLbl.Size = new System.Drawing.Size(65, 13);
+            this.albumLbl.Size = new System.Drawing.Size(0, 13);
             this.albumLbl.TabIndex = 4;
-            this.albumLbl.Text = "Album name";
             // 
             // artistsLbl
             // 
@@ -95,13 +100,12 @@
             this.artistsLbl.Location = new System.Drawing.Point(90, 83);
             this.artistsLbl.Margin = new System.Windows.Forms.Padding(5);
             this.artistsLbl.Name = "artistsLbl";
-            this.artistsLbl.Size = new System.Drawing.Size(64, 13);
+            this.artistsLbl.Size = new System.Drawing.Size(0, 13);
             this.artistsLbl.TabIndex = 5;
-            this.artistsLbl.Text = "Artists name";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(17, 105);
+            this.button1.Location = new System.Drawing.Point(17, 133);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 6;
@@ -112,29 +116,86 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(14, 14);
+            this.label4.Location = new System.Drawing.Point(220, 14);
             this.label4.Margin = new System.Windows.Forms.Padding(5);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(48, 13);
             this.label4.TabIndex = 7;
             this.label4.Text = "IS ADS?";
             // 
-            // checkBox1
+            // adsCb
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Enabled = false;
-            this.checkBox1.Location = new System.Drawing.Point(70, 14);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(15, 14);
-            this.checkBox1.TabIndex = 8;
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.adsCb.AutoSize = true;
+            this.adsCb.Enabled = false;
+            this.adsCb.Location = new System.Drawing.Point(276, 14);
+            this.adsCb.Name = "adsCb";
+            this.adsCb.Size = new System.Drawing.Size(15, 14);
+            this.adsCb.TabIndex = 8;
+            this.adsCb.UseVisualStyleBackColor = true;
+            // 
+            // privateCb
+            // 
+            this.privateCb.AutoSize = true;
+            this.privateCb.Enabled = false;
+            this.privateCb.Location = new System.Drawing.Point(197, 14);
+            this.privateCb.Name = "privateCb";
+            this.privateCb.Size = new System.Drawing.Size(15, 14);
+            this.privateCb.TabIndex = 10;
+            this.privateCb.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(117, 14);
+            this.label5.Margin = new System.Windows.Forms.Padding(5);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(72, 13);
+            this.label5.TabIndex = 9;
+            this.label5.Text = "IS PRIVATE?";
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(17, 104);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(274, 23);
+            this.progressBar1.Step = 1;
+            this.progressBar1.TabIndex = 11;
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
+            // 
+            // playingCb
+            // 
+            this.playingCb.AutoSize = true;
+            this.playingCb.Enabled = false;
+            this.playingCb.Location = new System.Drawing.Point(94, 14);
+            this.playingCb.Name = "playingCb";
+            this.playingCb.Size = new System.Drawing.Size(15, 14);
+            this.playingCb.TabIndex = 14;
+            this.playingCb.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(14, 14);
+            this.label6.Margin = new System.Windows.Forms.Padding(5);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(72, 13);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "IS PLAYING?";
             // 
             // Form3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.checkBox1);
+            this.Controls.Add(this.playingCb);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.privateCb);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.adsCb);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.artistsLbl);
@@ -160,6 +221,12 @@
         private System.Windows.Forms.Label artistsLbl;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.CheckBox checkBox1;
+        private System.Windows.Forms.CheckBox adsCb;
+        private System.Windows.Forms.CheckBox privateCb;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.CheckBox playingCb;
+        private System.Windows.Forms.Label label6;
     }
 }

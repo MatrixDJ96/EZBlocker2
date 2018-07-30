@@ -6,5 +6,6 @@
         public string Name { get; set; }
         public Info Album { get; set; }
         public Info[] Artists { get; set; }
+        public int Duration_ms { get; set; }
     }
 }

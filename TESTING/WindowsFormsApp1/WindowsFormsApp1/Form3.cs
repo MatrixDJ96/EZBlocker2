@@ -29,34 +29,68 @@ namespace WindowsFormsApp1
 
         public void GetINFO()
         {
+            timer1.Enabled = false;
+
             byte[] result = client.DownloadData("https://api.spotify.com/v1/me/player/currently-playing");
 
-            Response status = JsonConvert.DeserializeObject<Response>(Encoding.UTF8.GetString(result));
-
-            if (status.Item != null)
+            if (result != null && result.Length > 0)
             {
-                checkBox1.Checked = false;
+                Response status = JsonConvert.DeserializeObject<Response>(Encoding.UTF8.GetString(result));
 
-                songLbl.Text = status.Item.Name;
-                albumLbl.Text = status.Item.Album.Name;
+                playingCb.Checked = status.Is_playing;
+                privateCb.Checked = false;
 
-                artistsLbl.Text = "";
-                foreach (var artist in status.Item.Artists)
+                if (status.Item != null)
                 {
-                    if (artistsLbl.Text != string.Empty)
-                        artistsLbl.Text += " - ";
+                    progressBar1.Maximum = status.Item.Duration_ms;
+                    progressBar1.Value = status.Progress_ms;
 
-                    artistsLbl.Text += artist.Name;
+                    adsCb.Checked = false;
+
+                    songLbl.Text = status.Item.Name;
+                    albumLbl.Text = status.Item.Album.Name;
+
+                    string artists = "";
+                    foreach (var artist in status.Item.Artists)
+                    {
+                        if (artists != string.Empty)
+                            artists += " - ";
+
+                        artists += artist.Name;
+                    }
+
+                    artistsLbl.Text = artists;
+                }
+                else
+                {
+                    progressBar1.Value = 0;
+
+                    adsCb.Checked = true;
+
+                    songLbl.Text = "";
+                    albumLbl.Text = "";
+                    artistsLbl.Text = "";
                 }
             }
             else
             {
-                checkBox1.Checked = true;
+                progressBar1.Value = 0;
 
+                playingCb.Checked = false;
+                adsCb.Checked = false;
+                privateCb.Checked = true;
+                
                 songLbl.Text = "";
                 albumLbl.Text = "";
                 artistsLbl.Text = "";
             }
+
+            timer1.Enabled = true;
+        }
+
+        private void Timer1_Tick(object sender, EventArgs e)
+        {
+            GetINFO();
         }
     }
 }
