@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp1.JSON
 {
-    class Authorization
+    public class Authorization
     {
         public string Access_token { get; set; } = null;
         public string Token_type { get; set; } = null;

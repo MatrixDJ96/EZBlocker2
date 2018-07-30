@@ -52,9 +52,9 @@
             this.label1.Location = new System.Drawing.Point(14, 37);
             this.label1.Margin = new System.Windows.Forms.Padding(5);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
+            this.label1.Size = new System.Drawing.Size(38, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Song:";
+            this.label1.Text = "Track:";
             // 
             // label3
             // 
@@ -189,7 +189,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(308, 167);
             this.Controls.Add(this.playingCb);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.progressBar1);

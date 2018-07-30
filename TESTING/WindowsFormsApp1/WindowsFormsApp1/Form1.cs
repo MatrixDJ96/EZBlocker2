@@ -13,12 +13,14 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         private MyWebServer server = null;
-        private MyWebClient client = null;
+        private MyWebClient client_auth = null;
+        private MyWebClient client_info = null;
 
         private Form form = null;
 
-        private string code = null;
-        JSON.Authorization auth = null;
+        public static string code = null;
+        public static string redirect_uri = null;
+        public static JSON.Authorization auth = null;
 
         public Form1()
         {
@@ -59,13 +61,15 @@ namespace WindowsFormsApp1
             form.Show();
 
             try
-            {                
-                NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
+            {
+                redirect_uri = Uri.EscapeUriString(server.Address + ":" + server.Port);
 
+                NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
+                
                 data.Add("client_id", "b6058737c9a048ea88a7282b25374c2c");
                 data.Add("response_type", "code");
-                data.Add("redirect_uri", Uri.EscapeUriString(server.Address + ":" + server.Port));
-                data.Add("scope", Uri.EscapeDataString("user-read-currently-playing"));
+                data.Add("redirect_uri", redirect_uri);
+                data.Add("scope", "user-read-currently-playing");
 
                 ((Form2)form).webBrowser1.Navigated += WebBrowser1_Navigated;
                 ((Form2)form).webBrowser1.Navigate("https://accounts.spotify.com/authorize?" + data.ToString());
@@ -95,25 +99,19 @@ namespace WindowsFormsApp1
 
                     code = response.Get("code");
 
-                    client = new MyWebClient();
-                    client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    client.Headers[HttpRequestHeader.Authorization] = "Basic YjYwNTg3MzdjOWEwNDhlYTg4YTcyODJiMjUzNzRjMmM6NzIyMDMzZDA4YTk0NGU2MmI1ODI2ZjFhOTkzNzczNTg=";
+                    client_auth = new MyWebClient();
+                    client_info = new MyWebClient();
 
-                    NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
+                    client_auth.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                    client_info.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
 
-                    data.Add("grant_type", "authorization_code");
-                    data.Add("code", Uri.EscapeDataString(code));
-                    data.Add("redirect_uri", Uri.EscapeUriString(server.Address + ":" + server.Port));
-                    
+                    client_auth.Headers[HttpRequestHeader.Authorization] = "Basic YjYwNTg3MzdjOWEwNDhlYTg4YTcyODJiMjUzNzRjMmM6NzIyMDMzZDA4YTk0NGU2MmI1ODI2ZjFhOTkzNzczNTg=";
+                                        
                     try
-                    {
-                        byte[] result = client.UploadValues("https://accounts.spotify.com/api/token", "POST", data);
-
-                        auth = JsonConvert.DeserializeObject<JSON.Authorization>(Encoding.UTF8.GetString(result));
-                        
-                        client.Headers[HttpRequestHeader.Authorization] = auth.Token_type + " " + auth.Access_token;
-                        
-                        form = new Form3(client);
+                    {                        
+                        SetClientAuthorization(client_info, GetClientAuthorization(client_auth));
+                                                
+                        form = new Form3(client_info, client_auth);
                         form.Show();
 
                         ((Form3)form).GetINFO();
@@ -135,6 +133,31 @@ namespace WindowsFormsApp1
                     }
                 }
             }
+        }
+
+        public static byte[] GetClientAuthorization(MyWebClient client, bool refresh = false)
+        {
+            NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
+
+            if (!refresh)
+            {
+                data.Add("grant_type", "authorization_code");
+                data.Add("redirect_uri", redirect_uri);
+                data.Add("code", code);
+            }
+            else
+            {
+                data.Add("grant_type", "refresh_token");
+                data.Add("refresh_token", auth.Refresh_token);
+            }
+
+            return client.UploadValues("https://accounts.spotify.com/api/token", "POST", data);
+        }
+
+        public static void SetClientAuthorization(MyWebClient client, byte[] result)
+        {
+            auth = JsonConvert.DeserializeObject<JSON.Authorization>(Encoding.UTF8.GetString(result));
+            client.Headers[HttpRequestHeader.Authorization] = auth.Token_type + " " + auth.Access_token;
         }
     }
 }

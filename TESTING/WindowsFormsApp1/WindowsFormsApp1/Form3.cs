@@ -1,12 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1.JSON;
 
@@ -14,24 +9,39 @@ namespace WindowsFormsApp1
 {
     public partial class Form3 : Form
     {
-        private MyWebClient client = null;
+        private MyWebClient client_auth = null;
+        private MyWebClient client_info = null;
 
-        public Form3(MyWebClient client)
+        public Form3(MyWebClient client_auth, MyWebClient client_info)
         {
             InitializeComponent();
-            this.client = client;
+            this.client_auth = client_auth;
+            this.client_info = client_info;
         }
 
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            GetINFO();
-        }
+        private void Timer1_Tick(object sender, EventArgs e) => GetINFO();
 
-        public void GetINFO()
+        private void Button1_Click(object sender, EventArgs e) => GetINFO();
+
+        public async void GetINFO()
         {
             timer1.Enabled = false;
 
-            byte[] result = client.DownloadData("https://api.spotify.com/v1/me/player/currently-playing");
+            byte[] result = null;
+
+            try
+            {
+                result = await client_auth.DownloadDataTaskAsync("https://api.spotify.com/v1/me/player/currently-playing");
+
+            }
+            catch (WebException ex)
+            {
+                (new Form()).Show();
+                if (ex.Response is HttpWebResponse response && response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    Form1.SetClientAuthorization(client_auth, Form1.GetClientAuthorization(client_info, true));
+                }
+            }
 
             if (result != null && result.Length > 0)
             {
@@ -86,11 +96,6 @@ namespace WindowsFormsApp1
             }
 
             timer1.Enabled = true;
-        }
-
-        private void Timer1_Tick(object sender, EventArgs e)
-        {
-            GetINFO();
         }
     }
 }

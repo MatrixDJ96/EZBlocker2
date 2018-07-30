@@ -5,10 +5,7 @@ public class MyWebClient : WebClient
 {
     public CookieContainer CookieContainer { get; set; }
 
-    public MyWebClient() : this(new CookieContainer())
-    { }
-
-    public MyWebClient(CookieContainer c) => CookieContainer = c;
+    public MyWebClient() => CookieContainer = new CookieContainer();
 
     protected override WebRequest GetWebRequest(Uri address)
     {
