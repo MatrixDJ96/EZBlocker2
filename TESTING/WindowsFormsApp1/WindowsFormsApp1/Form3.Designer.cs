@@ -35,7 +35,6 @@
             this.songLbl = new System.Windows.Forms.Label();
             this.albumLbl = new System.Windows.Forms.Label();
             this.artistsLbl = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.adsCb = new System.Windows.Forms.CheckBox();
             this.privateCb = new System.Windows.Forms.CheckBox();
@@ -102,16 +101,6 @@
             this.artistsLbl.Name = "artistsLbl";
             this.artistsLbl.Size = new System.Drawing.Size(0, 13);
             this.artistsLbl.TabIndex = 5;
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(17, 133);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "Get INFO";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.Button1_Click);
             // 
             // label4
             // 
@@ -189,7 +178,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(308, 167);
+            this.ClientSize = new System.Drawing.Size(306, 136);
             this.Controls.Add(this.playingCb);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.progressBar1);
@@ -197,13 +186,13 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.adsCb);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.artistsLbl);
             this.Controls.Add(this.albumLbl);
             this.Controls.Add(this.songLbl);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "Form3";
             this.Text = "Form3";
             this.ResumeLayout(false);
@@ -219,7 +208,6 @@
         private System.Windows.Forms.Label songLbl;
         private System.Windows.Forms.Label albumLbl;
         private System.Windows.Forms.Label artistsLbl;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.CheckBox adsCb;
         private System.Windows.Forms.CheckBox privateCb;
