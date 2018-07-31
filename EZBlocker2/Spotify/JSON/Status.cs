@@ -1,4 +1,6 @@
-﻿namespace EZBlocker2.Spotify.JSON
+﻿using System;
+
+namespace EZBlocker2.Spotify.JSON
 {
     class Info
     {
@@ -16,6 +18,7 @@
     class Error
     {
         public string Message { get; set; }
+        public static implicit operator Error(string message) => new Error { Message = message };
     }
 
     class Status
@@ -28,6 +31,7 @@
         
         public bool Is_Running { get; set; }
         public bool Is_Private { get; set; } = false;
-        public bool Is_Ads { get => Item == null; } 
+        public bool Is_Ads { get => Item == null; }
+        
     }
 }
