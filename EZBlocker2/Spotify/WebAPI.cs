@@ -40,13 +40,14 @@ namespace EZBlocker2.Spotify
                 Task.Factory.StartNew(() => GetToken());
             }
         }
-        public static APIToken APIToken { get; set; } = null;
-
+        
         public static string GrantType(bool refresh)
         {
             return refresh ? "refresh_token" : "authorization_code";
         }
 
+        public static APIToken APIToken { get; set; } = null;
+        
         private static void GetToken(bool refresh = false)
         {
             client = new CustomWebClient();
@@ -77,11 +78,11 @@ namespace EZBlocker2.Spotify
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //Application.Exit();
+                WriteLog(ex);
+                NewStatus.Invoke(new Status() { Error = ex.Message });
             }
         }
-
+        
         public static async void GetStatus()
         {
             try
