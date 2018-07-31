@@ -13,13 +13,21 @@
         public int Duration_ms { get; set; }
     }
 
+    class Error
+    {
+        public string Message { get; set; }
+    }
+
     class Status
     {
+        public Error Error { get; set; }
+
         public int Progress_ms { get; set; }
         public Item Item { get; set; }
         public bool Is_Playing { get; set; }
         
-        public bool IsPrivateSession { get; set; } = false;
-        public bool IsAds { get => Item == null; } 
+        public bool Is_Running { get; set; }
+        public bool Is_Private { get; set; } = false;
+        public bool Is_Ads { get => Item == null; } 
     }
 }
