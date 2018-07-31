@@ -6,21 +6,16 @@ namespace EZBlocker2
 {
     class CustomWebClient : WebClient
     {
-        private int timeout = 60000;
         private Timer timer = null;
-        private ElapsedEventHandler handler = null;
+
+        public int Timeout { get; set; } = 60000;
+        public CookieContainer CookieContainer { get; set; }
 
         public CustomWebClient()
         {
-            timer = new Timer(timeout);
-            handler = Timer_Timeout;
-            timer.Elapsed += handler;
-        }
-
-        public int Timeout
-        {
-            get => timeout;
-            set => timeout = value;
+            CookieContainer = new CookieContainer();
+            timer = new Timer(Timeout);
+            timer.Elapsed += Timer_Timeout;
         }
 
         private void Timer_Timeout(object sender, ElapsedEventArgs e)
@@ -33,14 +28,16 @@ namespace EZBlocker2
         {
             WebRequest request = base.GetWebRequest(address);
 
-            if (timeout > 0)
+            ((HttpWebRequest)request).CookieContainer = CookieContainer;
+
+            if (Timeout > 0)
             {
                 // Sync timeout
-                request.Timeout = timeout;
+                request.Timeout = Timeout;
 
                 // Async timeout
-                if (timer.Interval != timeout)
-                    timer.Interval = timeout;
+                if (timer.Interval != Timeout)
+                    timer.Interval = Timeout;
                 
                 timer.Start();
             }
