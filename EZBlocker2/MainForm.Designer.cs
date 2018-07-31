@@ -440,6 +440,7 @@ namespace EZBlocker2
             // 
             // timerStatus
             // 
+            this.timerStatus.Interval = 200;
             this.timerStatus.Tick += new System.EventHandler(this.TimerStatus_Tick);
             // 
             // MainForm
