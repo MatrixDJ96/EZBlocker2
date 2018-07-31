@@ -1,15 +1,21 @@
-﻿using Microsoft.Win32;
+﻿using EZBlocker2.Spotify.JSON;
+using Microsoft.Win32;
 using NAudio.CoreAudioApi;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
-using static EZBlocker2.Program;
 using static EZBlocker2.HostsPatches;
+using static EZBlocker2.Program;
 
 namespace EZBlocker2
 {
@@ -26,8 +32,7 @@ namespace EZBlocker2
 
         // Classic Spotify files
         private readonly string spotifyFullExe = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
-        private string spotifyPrefsFullFile = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\prefs";
-
+        
         // Current SessionId
         private readonly int currentSessionId = Process.GetCurrentProcess().SessionId;
 
@@ -37,6 +42,9 @@ namespace EZBlocker2
         private readonly string original_website = "https://github.com/Xeroday/Spotify-Ad-Blocker";
         private readonly string designer_website = "https://github.com/Bruske";
 
+        // WebServer
+        private CustomWebServer server = null;
+        
         // Form movement and location
         private CustomMovement movement;
         private Point centerLocation;
@@ -168,6 +176,8 @@ namespace EZBlocker2
 
             if (timeout != 0)
                 Thread.Sleep(5000);
+
+            server.Stop();
 
             Application.Exit();
         }
@@ -393,11 +403,10 @@ namespace EZBlocker2
                 {
                     List<string> lines = new List<string>(Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + @"\Packages"));
                     string folder = lines.Find(x => x.ToLower().Contains("spotifyab.spotifymusic"));
+
                     if (folder != null)
-                    {
-                        spotifyPrefsFullFile = folder + @"\LocalState\Spotify\prefs";
                         winStoreApp = true;
-                    }
+
                     if (!winStoreApp)
                         spotifyNotInstalled = true;
                 }
@@ -405,53 +414,14 @@ namespace EZBlocker2
                     spotifyNotInstalled = true;
             }
 
-            // Enable WebHelper
-            if (!spotifyNotInstalled)
-            {
-                if (!IsSpotifyRunning())
-                    execSpotify = true; // Start Spotify
-
-                try
-                {
-                    string spotifyPrefsPath = Path.GetDirectoryName(spotifyPrefsFullFile);
-                    if (!Directory.Exists(spotifyPrefsPath))
-                        Directory.CreateDirectory(spotifyPrefsPath);
-                    if (!File.Exists(spotifyPrefsFullFile))
-                        File.Create(spotifyPrefsFullFile).Close();
-
-                    List<string> lines = new List<string>(File.ReadAllLines(spotifyPrefsFullFile));
-
-                    bool webhelperEnabled = false;
-                    for (int i = 0; i < lines.Count; i++)
-                    {
-                        if (lines[i].Contains("webhelper.enabled"))
-                        {
-                            if (!lines[i].Contains("true"))
-                                lines.RemoveAt(i);
-                            else
-                                webhelperEnabled = true;
-                            break;
-                        }
-                    }
-                    if (!webhelperEnabled)
-                    {
-                        lines.Add("webhelper.enabled=true");
-                        File.WriteAllLines(spotifyPrefsFullFile, lines);
-                        execSpotify = true; // Restart Spotify
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("Unable to enable 'Allow Spotify to be opened from the web'.\r\nEnable it in 'Edit' -> 'Preferences' -> 'Advanced settings'", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    KillEZBlocker();
-                }
-            }
-            else
+            if (spotifyNotInstalled)
             {
                 MessageBox.Show("Spotify seems not to be installed on your system.\r\nEZBlocker 2 is useless for you...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 KillEZBlocker();
             }
-
+            else if (!IsSpotifyRunning())
+                execSpotify = true; // Start Spotify
+            
             // Load settings
             checkBoxMuteAds.Checked = Properties.Settings.Default.MuteAds;
             checkBoxBlockAds.Checked = Properties.Settings.Default.BlockAds;
@@ -495,6 +465,10 @@ namespace EZBlocker2
                 ExecSpotify();
             }
 
+            // Start server
+            server = new CustomWebServer();
+            server.Start();
+
             timerSleep.Enabled = true;
         }
 
@@ -522,9 +496,17 @@ namespace EZBlocker2
             {
                 timerSleep.Enabled = false;
 
-                Spotilocal.emitter.NewStatus += Main_Status;
+                Spotify.WebAPI.NewStatus += Main_Status;
+                Spotify.WebAPI.RedirectUri = Uri.EscapeUriString(server.Prefix);
 
-                ShowMessage("Checking Spotify port...");
+                NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
+
+                data.Add("scope", Spotify.WebAPI.Scope);
+                data.Add("client_id", Spotify.WebAPI.ClientID);
+                data.Add("redirect_uri", Spotify.WebAPI.RedirectUri);
+                data.Add("response_type", Spotify.WebAPI.ResponseType);
+                
+                Process.Start("https://accounts.spotify.com/authorize?" + data.ToString());
 
                 timerStatus.Enabled = true;
             }
@@ -534,31 +516,39 @@ namespace EZBlocker2
                 countdown--;
             }
             else
-            {
                 KillEZBlocker();
-            }
         }
-
+        
         private void TimerStatus_Tick(object sender, EventArgs e)
         {
-            timerStatus.Enabled = false; // wait...
-            Spotilocal.GetStatus();
+            if (Spotify.WebAPI.APIToken != null)
+            {
+                timerStatus.Enabled = false; // wait...
+                Spotify.WebAPI.GetStatus();
+            }
         }
-
-        internal void Main_Status(SpotilocalStatus status)
+        
+        internal void Main_Status(Status status)
         {
             bool enable = true; // start?
 
-            if (!status.IsError)
+            if (!IsSpotifyRunning())
+            {
+                enable = false; // stop!
+                MinimizeEZBlocker();
+                notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                CloseEZBlocker(3000);
+            }
+            else
             {
                 if (status.IsPrivateSession)
                     ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
                 else
                 {
-                    if (status.IsPlaying)
+                    if (status.Is_Playing)
                     {
-                        Mute(status.IsAd && checkBoxMuteAds.Checked);
-                        if (status.IsAd)
+                        Mute(status.IsAds && checkBoxMuteAds.Checked);
+                        if (status.IsAds)
                         {
                             if (checkBoxMuteAds.Checked)
                                 ShowMessage("Muting: Ad");
@@ -566,28 +556,30 @@ namespace EZBlocker2
                                 ShowMessage("Playing: Ad");
                         }
                         else
-                            ShowMessage("Playing: " + status.Track.Song, "Artist: " + status.Track.Artist, "Album: " + status.Track.Album);
+                        {
+                            string artists = "";
+
+                            foreach (var artist in status.Item.Artists)
+                            {
+                                if (artists != string.Empty)
+                                    artists += " - ";
+
+                                artists += artist.Name;
+                            }
+
+                            ShowMessage("Playing: " + status.Item.Name, "Artists: " + artists, "Album: " + status.Item.Album.Name);
+                        }
                     }
                     else
                         ShowMessage("Spotify is in pause");
                 }
             }
-            else
-            {
-                if (!IsSpotifyRunning())
-                {
-                    enable = false; // stop!
-                    MinimizeEZBlocker();
-                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                    CloseEZBlocker(3000);
-                }
-                else
-                {
-                    string text = "Error: " + status.Message;
-                    ShowMessage(text, text);
-                }
-            }
 
+            /*
+                string text = "Error: " + status.Message;
+                ShowMessage(text, text);
+            */
+            
             if (enable)
                 timerStatus.Enabled = true; // go!
         }
