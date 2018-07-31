@@ -1,7 +1,6 @@
 ﻿using EZBlocker2.Spotify.JSON;
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -9,9 +8,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using static EZBlocker2.HostsPatches;
@@ -528,11 +526,13 @@ namespace EZBlocker2
             }
         }
         
-        internal void Main_Status(Status status)
+        private async void Main_Status(Status status)
         {
             bool enable = true; // start?
 
-            if (!IsSpotifyRunning())
+            status.Is_Running = await Task.Factory.StartNew(IsSpotifyRunning);
+
+            if (!status.Is_Running)
             {
                 enable = false; // stop!
                 MinimizeEZBlocker();
@@ -541,45 +541,48 @@ namespace EZBlocker2
             }
             else
             {
-                if (status.IsPrivateSession)
-                    ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
-                else
+                if (status.Error == null)
                 {
-                    if (status.Is_Playing)
+                    if (status.Is_Private)
+                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
+                    else
                     {
-                        Mute(status.IsAds && checkBoxMuteAds.Checked);
-                        if (status.IsAds)
+                        if (status.Is_Playing)
                         {
-                            if (checkBoxMuteAds.Checked)
-                                ShowMessage("Muting: Ad");
+                            Mute(status.Is_Ads && checkBoxMuteAds.Checked);
+                            if (status.Is_Ads)
+                            {
+                                if (checkBoxMuteAds.Checked)
+                                    ShowMessage("Muting: Ads");
+                                else
+                                    ShowMessage("Playing: Ads");
+                            }
                             else
-                                ShowMessage("Playing: Ad");
+                            {
+                                string artists = "";
+
+                                foreach (var artist in status.Item.Artists)
+                                {
+                                    if (artists != string.Empty)
+                                        artists += " - ";
+
+                                    artists += artist.Name;
+                                }
+
+                                ShowMessage("Playing: " + status.Item.Name, "Artists: " + artists, "Album: " + status.Item.Album.Name);
+                            }
                         }
                         else
-                        {
-                            string artists = "";
-
-                            foreach (var artist in status.Item.Artists)
-                            {
-                                if (artists != string.Empty)
-                                    artists += " - ";
-
-                                artists += artist.Name;
-                            }
-
-                            ShowMessage("Playing: " + status.Item.Name, "Artists: " + artists, "Album: " + status.Item.Album.Name);
-                        }
+                            ShowMessage("Spotify is in pause");
                     }
-                    else
-                        ShowMessage("Spotify is in pause");
+                }
+                else
+                {
+                    string text = "Error: " + status.Error.Message;
+                    ShowMessage(text);
                 }
             }
 
-            /*
-                string text = "Error: " + status.Message;
-                ShowMessage(text, text);
-            */
-            
             if (enable)
                 timerStatus.Enabled = true; // go!
         }
