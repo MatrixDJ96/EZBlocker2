@@ -11,7 +11,6 @@ namespace EZBlocker2
     {
         private HttpListener listener = null;
         private Thread thread = null;
-        private bool running = false;
 
         public string Prefix { get; internal set; }
 
@@ -24,10 +23,8 @@ namespace EZBlocker2
 
         public void Start()
         {
-            if (!running)
+            if (!listener.IsListening)
             {
-                running = true;
-
                 listener.Start();
 
                 if (thread != null && thread.ThreadState == ThreadState.Running)
@@ -37,7 +34,7 @@ namespace EZBlocker2
                 {
                     thread = new Thread(() =>
                     {
-                        while (running)
+                        while (true)
                         {
                             try
                             {
@@ -58,7 +55,7 @@ namespace EZBlocker2
 
                                 if (Spotify.WebAPI.APIToken == null)
                                     error = true;
-                                
+
                                 context.Response.StatusCode = 200;
 
                                 StreamWriter response = new StreamWriter(context.Response.OutputStream);
@@ -67,10 +64,13 @@ namespace EZBlocker2
                                     response.Write(Properties.Resources.AuthorizationError.Replace("{AUTHORIZE_URL}", Spotify.WebAPI.AuthorizeUrl));
                                 else
                                     response.Write(Properties.Resources.AuthorizationSuccess);
-                                
+
                                 response.Close();
                             }
-                            catch { }
+                            catch
+                            {
+                                break;
+                            }
                         }
                     });
                     thread.Start();
@@ -80,9 +80,8 @@ namespace EZBlocker2
 
         public void Stop()
         {
-            if (running || thread.ThreadState == ThreadState.Running)
+            if (listener.IsListening)
             {
-                running = false;
                 listener.Stop();
                 listener.Close();
             }

@@ -583,7 +583,7 @@ namespace EZBlocker2
                 else
                 {
                     string text = "Error: " + Spotify.WebAPI.Status.Error.Message;
-                    ShowMessage(text);
+                    ShowMessage(text, text);
                 }
             }
 
