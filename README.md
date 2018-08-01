@@ -52,6 +52,13 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.3.1:
+- Improved error handling
+- Improved and fixed WebServer
+- Decreased (half) request for second
+- Improved error reporting (log)
+- Little fixes
+
 Version 2.1.3.0:
 - Using new Spotify WebAPI (beta)
 
