@@ -44,32 +44,31 @@ namespace EZBlocker2
                                 HttpListenerContext context = listener.GetContext();
 
                                 bool error = false;
+
                                 if (context.Request.Url.Query != null)
                                 {
                                     NameValueCollection query = HttpUtility.ParseQueryString(context.Request.Url.Query);
 
                                     if (query.Get("error") == null && query.Get("code") != null)
+                                    {
                                         Spotify.WebAPI.Code = query.Get("code");
-                                    else
-                                        error = true;
+                                        Spotify.WebAPI.GetToken();
+                                    }
                                 }
 
-                                StreamWriter response = new StreamWriter(context.Response.OutputStream);
+                                if (Spotify.WebAPI.APIToken == null)
+                                    error = true;
                                 
-                                response.WriteLine("<html>");
-                                response.WriteLine("<head>");
-                                response.WriteLine("<title>EZBlocker 2</title>");
-                                response.WriteLine("</head>");
-                                response.WriteLine("<body>");
-                                response.Write("<h1>" + (error ? "<span style='color:red'>Authentication failed...</span>" : "Authentication completed!") + "</h1>");
-                                response.Write("<h2>" + (error ? "Try to reload this page" : "You could close this window") + "</h2>");
-                                response.WriteLine("</body>");
-                                response.WriteLine("</html>");
+                                context.Response.StatusCode = 200;
 
+                                StreamWriter response = new StreamWriter(context.Response.OutputStream);
+
+                                if (error)
+                                    response.Write(Properties.Resources.AuthorizationError.Replace("{AUTHORIZE_URL}", Spotify.WebAPI.AuthorizeUrl));
+                                else
+                                    response.Write(Properties.Resources.AuthorizationSuccess);
+                                
                                 response.Close();
-
-                                if (!error)
-                                    Stop();
                             }
                             catch { }
                         }
@@ -85,6 +84,7 @@ namespace EZBlocker2
             {
                 running = false;
                 listener.Stop();
+                listener.Close();
             }
         }
     }
