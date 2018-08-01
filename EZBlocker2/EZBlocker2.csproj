@@ -156,6 +156,11 @@
   <ItemGroup>
     <None Include="Resources\Song.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\AuthorizationSuccess.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AuthorizationError.html" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

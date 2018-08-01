@@ -61,6 +61,46 @@ namespace EZBlocker2.Properties {
         }
         
         /// <summary>
+        ///   Cerca una stringa localizzata simile a &lt;!DOCTYPE html&gt;
+        ///&lt;html lang=&quot;en&quot;&gt;
+        ///&lt;head&gt;
+        ///    &lt;meta charset=&quot;UTF-8&quot;&gt;
+        ///    &lt;title&gt;EZBlocker 2&lt;/title&gt;
+        ///&lt;/head&gt;
+        ///&lt;body&gt;
+        ///&lt;h1&gt;&lt;span style=&apos;color:red&apos;&gt;Authorization failed...&lt;/span&gt;&lt;/h1&gt;
+        ///&lt;h2&gt;Try to reload this &lt;a href=&quot;{REDIRECT_URI}&quot;&gt;page&lt;/a&gt;&lt;/h2&gt;
+        ///&lt;/body&gt;
+        ///&lt;/html&gt;
+        ///.
+        /// </summary>
+        internal static string AuthorizationError {
+            get {
+                return ResourceManager.GetString("AuthorizationError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Cerca una stringa localizzata simile a &lt;!DOCTYPE html&gt;
+        ///&lt;html lang=&quot;en&quot;&gt;
+        ///&lt;head&gt;
+        ///    &lt;meta charset=&quot;UTF-8&quot;&gt;
+        ///    &lt;title&gt;EZBlocker 2&lt;/title&gt;
+        ///&lt;/head&gt;
+        ///&lt;body&gt;
+        ///&lt;h1&gt;Authorization succeeded!&lt;/h1&gt;
+        ///&lt;h2&gt;You may now close this window&lt;/h2&gt;
+        ///&lt;/body&gt;
+        ///&lt;/html&gt;
+        ///.
+        /// </summary>
+        internal static string AuthorizationSuccess {
+            get {
+                return ResourceManager.GetString("AuthorizationSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Cerca una risorsa localizzata di tipo System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Background {
