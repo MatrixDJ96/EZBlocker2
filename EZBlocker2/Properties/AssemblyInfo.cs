@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // set di attributi. Modificare i valori di questi attributi per modificare le informazioni
 // associate a un assembly.
 [assembly: AssemblyTitle("EZBlocker 2")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Ad muter/blocker for Spotify")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("MatrixDJ96")]
 [assembly: AssemblyProduct("EZBlocker 2")]
-[assembly: AssemblyCopyright("Copyright © 2017")]
+[assembly: AssemblyCopyright("Copyright © 2017-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.1.3.1")]
-[assembly: AssemblyFileVersion("2.1.3.1")]
+[assembly: AssemblyVersion("2.1.3.2")]
+[assembly: AssemblyFileVersion("2.1.3.2")]
