@@ -176,7 +176,7 @@ namespace EZBlocker2
 
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12; // enable all protocols
 
-                    //Application.Run(new UpdateForm());
+                    Application.Run(new UpdateForm());
                     Application.Run(new MainForm());
                 }
                 else
