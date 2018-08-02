@@ -28,8 +28,7 @@ namespace EZBlocker2.Spotify.JSON
         public int Progress_ms { get; set; }
         public Item Item { get; set; }
         public bool Is_Playing { get; set; }
-        
-        public bool Is_Running { get; set; }
+
         public bool Is_Private { get; set; } = false;
         public bool Is_Ads { get => Item == null; }
         
