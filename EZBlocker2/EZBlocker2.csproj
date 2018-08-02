@@ -71,7 +71,6 @@
     <Compile Include="Custom\CustomProfessionalColorTable.cs" />
     <Compile Include="Custom\CustomSettingsProvider.cs" />
     <Compile Include="Custom\CustomToolStripRenderer.cs" />
-    <Compile Include="Custom\CustomWebClient.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

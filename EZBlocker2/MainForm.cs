@@ -1,5 +1,4 @@
-﻿using EZBlocker2.Spotify.JSON;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using NAudio.CoreAudioApi;
 using System;
 using System.Collections.Generic;
@@ -50,14 +49,14 @@ namespace EZBlocker2
         // Spotify system volume variable
         private bool muted = false;
 
+        // Countdown timer
+        private int countdown = 30; // seconds
+
         // Useful booleans
         private bool winStoreApp = false;
         private bool spotifyNotInstalled = false;
         private bool execSpotify = false;
         private bool exiting = false;
-
-        // Countdown timer
-        private int countdown = 30; // seconds
 
         // Label message
         private string[] message = { "", "", "" }; // useful to store info
@@ -89,6 +88,7 @@ namespace EZBlocker2
             movement.SetMovement(Controls);
 
             contextMenuStrip.Renderer = new CustomToolStripRenderer();
+
             titleLabel.Text = "v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
             if (IsAdmin)
             {
@@ -96,6 +96,7 @@ namespace EZBlocker2
                 string checkBoxBlockAdsToolTip = toolTip.GetToolTip(checkBoxBlockAds);
                 toolTip.SetToolTip(checkBoxBlockAds, checkBoxBlockAdsToolTip.Substring(0, checkBoxBlockAdsToolTip.IndexOf('(') - 1));
             }
+
             labelMessage.UseMnemonic = false; // display the ampersand character
 
             if (Properties.Settings.Default.StartMinimized)
@@ -172,10 +173,11 @@ namespace EZBlocker2
         {
             exiting = true;
 
-            if (timeout != 0)
-                Thread.Sleep(5000);
-
+            // Could it be listening?
             server.Stop();
+
+            if (timeout != 0)
+                Thread.Sleep(timeout);
 
             Application.Exit();
         }
@@ -183,12 +185,8 @@ namespace EZBlocker2
         private bool IsSpotifyRunning()
         {
             Process[] processes = Process.GetProcessesByName("spotify");
-            Process[] processesCurrentSessionId = processes.Where(x => x.SessionId == currentSessionId).ToArray();
-
-            if (processesCurrentSessionId.Length > 0)
-                return true;
-            else
-                return false;
+            Process[] processesCurrentSessionId = processes.Where(x => x.SessionId == currentSessionId).ToArray();            
+            return processesCurrentSessionId.Length > 0 ? true : false;
         }
 
         private void KillSpotify()
@@ -466,11 +464,11 @@ namespace EZBlocker2
             // Start server
             server = new CustomWebServer();
             server.Start();
-
-            timerSleep.Enabled = true;
+            
+            timerSpotify.Enabled = true;
         }
 
-        private void MainForm_Shown(object sender, EventArgs e)
+        private void Main_Shown(object sender, EventArgs e)
         {
             if (StartPosition == FormStartPosition.CenterScreen)
                 centerLocation = Location;
@@ -486,13 +484,23 @@ namespace EZBlocker2
                 MinimizeEZBlocker();
         }
 
-        private void TimerSleep_Tick(object sender, EventArgs e)
+        private void TimerSpotify_Tick(object sender, EventArgs e)
         {
-            timerSleep.Interval = 1000;
-
-            if (IsSpotifyRunning())
+            if (!IsSpotifyRunning())
             {
-                timerSleep.Enabled = false;
+                if (countdown > 0)
+                {
+                    ShowMessage("Waiting for Spotify...");
+                    countdown--;
+                }
+                else
+                    CloseEZBlocker();
+            }
+            else
+            {
+                timerSpotify.Enabled = false;
+
+                ShowMessage("Hooking to Spotify...");
 
                 Spotify.WebAPI.NewStatus += Main_Status;
                 Spotify.WebAPI.RedirectUri = Uri.EscapeUriString(server.Prefix);
@@ -506,62 +514,37 @@ namespace EZBlocker2
 
                 Spotify.WebAPI.AuthorizeUrl = "https://accounts.spotify.com/authorize?" + data.ToString();
 
+                // Open Spotify authorization page
                 Process.Start(Spotify.WebAPI.AuthorizeUrl);
 
                 timerStatus.Enabled = true;
             }
-            else if (countdown > 0)
-            {
-                ShowMessage("Waiting for Spotify...");
-                countdown--;
-            }
-            else
-                KillEZBlocker();
         }
-        
+
         private void TimerStatus_Tick(object sender, EventArgs e)
         {
             if (Spotify.WebAPI.APIToken != null)
             {
                 timerStatus.Enabled = false; // wait...
-                server.Stop();
-
                 Spotify.WebAPI.GetStatus();
             }
         }
         
-        private async void Main_Status()
+        private void Main_Status()
         {
             bool enable = true; // start?
 
-            Spotify.WebAPI.Status.Is_Running = await Task.Factory.StartNew(IsSpotifyRunning);
-
-            if (!Spotify.WebAPI.Status.Is_Running)
-            {
-                enable = false; // stop!
-                MinimizeEZBlocker();
-                notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                CloseEZBlocker(3000);
-            }
-            else
+            if (IsSpotifyRunning())
             {
                 if (Spotify.WebAPI.Status.Error == null)
                 {
-                    if (Spotify.WebAPI.Status.Is_Private)
-                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
-                    else
+                    if (!Spotify.WebAPI.Status.Is_Private)
                     {
                         if (Spotify.WebAPI.Status.Is_Playing)
                         {
                             Mute(Spotify.WebAPI.Status.Is_Ads && checkBoxMuteAds.Checked);
-                            if (Spotify.WebAPI.Status.Is_Ads)
-                            {
-                                if (checkBoxMuteAds.Checked)
-                                    ShowMessage("Muting: Ads");
-                                else
-                                    ShowMessage("Playing: Ads");
-                            }
-                            else
+
+                            if (!Spotify.WebAPI.Status.Is_Ads)
                             {
                                 string artists = "";
 
@@ -575,22 +558,30 @@ namespace EZBlocker2
 
                                 ShowMessage("Playing: " + Spotify.WebAPI.Status.Item.Name, "Artists: " + artists, "Album: " + Spotify.WebAPI.Status.Item.Album.Name);
                             }
+                            else
+                                ShowMessage((checkBoxMuteAds.Checked ? "Muting" : "Playing") + ": Ads");
                         }
                         else
                             ShowMessage("Spotify is in pause");
                     }
+                    else
+                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
                 }
                 else
-                {
-                    string text = "Error: " + Spotify.WebAPI.Status.Error.Message;
-                    ShowMessage(text, text);
-                }
+                    ShowMessage("Error: " + Spotify.WebAPI.Status.Error.Message, "Error: " + Spotify.WebAPI.Status.Error.Message);
+            }
+            else
+            {
+                enable = false; // stop!
+                MinimizeEZBlocker();
+                notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                CloseEZBlocker(3000);
             }
 
             if (enable)
                 timerStatus.Enabled = true; // go!
         }
-
+                
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.ControlKey)

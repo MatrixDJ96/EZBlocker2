@@ -15,7 +15,7 @@ namespace EZBlocker2.Spotify
 {
     static class WebAPI
     {
-        private static CustomWebClient client;
+        private static WebClient client = new WebClient();
 
         public static string ResponseType { get; } = "code";
         public static string Scope { get; } = "user-read-currently-playing";
@@ -34,7 +34,8 @@ namespace EZBlocker2.Spotify
 
         private static Status status;
         public static Status Status
-        { get => status;
+        {
+            get => status;
             set
             {
                 status = value;
@@ -42,13 +43,7 @@ namespace EZBlocker2.Spotify
                     NewStatus.Invoke();
             }
         }
-
-        private static string code = null;
-        public static string Code
-        {
-            get => code;
-            set { code = value /*+ "FAKE"*/; }
-        }
+        public static string Code { get; set; } = null;
 
         public static string GrantType(bool refresh)
         {
@@ -59,7 +54,6 @@ namespace EZBlocker2.Spotify
 
         public static void GetToken(bool refresh = false)
         {
-            client = new CustomWebClient();
             client.Headers[HttpRequestHeader.ContentType] = ContentType;
             client.Headers[HttpRequestHeader.Authorization] = Authorization;
 
