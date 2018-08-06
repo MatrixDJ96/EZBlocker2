@@ -53,6 +53,10 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.3.3:
+- Improved log
+- (re)Fixed WebAPI (refresh_token)
+
 Version 2.1.3.2:
 - Improved WebServer
 - Fixed WebAPI (refresh_token)
