@@ -74,7 +74,13 @@ namespace EZBlocker2.Spotify
             try
             {
                 byte[] result = client.UploadValues(APIUrl, "POST", data);
-                APIToken = JsonConvert.DeserializeObject<APIToken>(Encoding.UTF8.GetString(result));
+
+                APIToken token = JsonConvert.DeserializeObject<APIToken>(Encoding.UTF8.GetString(result));
+                string refresh_token = token?.Refresh_Token ?? APIToken?.Refresh_Token;
+
+                APIToken = token;
+                if (refresh_token != null && APIToken != null && APIToken.Refresh_Token != refresh_token)
+                    APIToken.Refresh_Token = refresh_token;
 
                 if (refresh)
                     GetStatus();
@@ -115,9 +121,15 @@ namespace EZBlocker2.Spotify
                 {
                     DateTime.Now.ToString(),
                     "error = " + ex.Message,
-                    "----------------------"
+                    "code = " + (Code ?? ""),
+                    "access_token = " + (APIToken?.Access_Token ?? ""),
+                    "token_type = " + (APIToken?.Token_Type ?? ""),
+                    "scope = " +(APIToken?.Scope ?? ""),
+                    "refresh_token = " + (APIToken?.Refresh_Token ?? ""),
+                    "--------------------------------------------------"
                 };
-                File.AppendAllLines(ezBlockerLog, lines);
+                lines.InsertRange(lines.Count, File.ReadAllLines(ezBlockerLog));
+                File.WriteAllLines(ezBlockerLog, lines);
             }
             catch { }
         }
