@@ -5,7 +5,6 @@
         public static readonly string[] hostsPatches = {
             "adclick.g.doublecklick.net",
             "adnxs.com",
-            "adnxs.com",
             "adplexmedia.adk2x.com",
             "ads.spotify.com",
             "ads-fa.spotify.com",
