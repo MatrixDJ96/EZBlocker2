@@ -60,6 +60,7 @@ namespace EZBlocker2
 
         // Label message
         private string[] message = { "", "", "" }; // useful to store info
+        private Process processTmp;
 
         /* Constructor */
         public MainForm()
@@ -104,6 +105,23 @@ namespace EZBlocker2
         }
 
         /* Callable functions */
+        private void CleanLog()
+        {
+            if (File.Exists(ezBlockerLog))
+            {
+                try
+                {
+                    string oldEZBlockerLog = ezBlockerLog + ".old";
+
+                    if (File.Exists(oldEZBlockerLog))
+                        File.Delete(oldEZBlockerLog);
+                    
+                    File.Move(ezBlockerLog, oldEZBlockerLog);
+                }
+                catch { }
+            }
+        }
+
         private void SetCustomEvent(Control.ControlCollection collection)
         {
             foreach (Control control in collection)
@@ -461,6 +479,8 @@ namespace EZBlocker2
                 ExecSpotify();
             }
 
+            CleanLog();
+
             // Start server
             server = new CustomWebServer();
             server.Start();
@@ -515,7 +535,7 @@ namespace EZBlocker2
                 Spotify.WebAPI.AuthorizeUrl = "https://accounts.spotify.com/authorize?" + data.ToString();
 
                 // Open Spotify authorization page
-                Process.Start(Spotify.WebAPI.AuthorizeUrl);
+                processTmp = Process.Start(Spotify.WebAPI.AuthorizeUrl);
 
                 timerStatus.Enabled = true;
             }
@@ -525,6 +545,16 @@ namespace EZBlocker2
         {
             if (Spotify.WebAPI.APIToken != null)
             {
+                try
+                {
+                    if (processTmp != null && !processTmp.HasExited)
+                    {
+                        processTmp.Kill();
+                        processTmp = null;
+                    }
+                }
+                catch { }
+                
                 timerStatus.Enabled = false; // wait...
                 Spotify.WebAPI.GetStatus();
             }
@@ -533,50 +563,57 @@ namespace EZBlocker2
         private void Main_Status()
         {
             bool enable = true; // start?
-
-            if (IsSpotifyRunning())
+            
+            if (Spotify.WebAPI.Status.Retry_After == 0)
             {
-                if (Spotify.WebAPI.Status.Error == null)
+                timerStatus.Interval = 300;
+
+                if (IsSpotifyRunning())
                 {
-                    if (!Spotify.WebAPI.Status.Is_Private)
+                    if (Spotify.WebAPI.Status.Error == null)
                     {
-                        if (Spotify.WebAPI.Status.Is_Playing)
+                        if (!Spotify.WebAPI.Status.Is_Private)
                         {
-                            Mute(Spotify.WebAPI.Status.Is_Ads && checkBoxMuteAds.Checked);
-
-                            if (!Spotify.WebAPI.Status.Is_Ads)
+                            if (Spotify.WebAPI.Status.Is_Playing)
                             {
-                                string artists = "";
+                                Mute(Spotify.WebAPI.Status.Is_Ads && checkBoxMuteAds.Checked);
 
-                                foreach (var artist in Spotify.WebAPI.Status.Item.Artists)
+                                if (!Spotify.WebAPI.Status.Is_Ads)
                                 {
-                                    if (artists != string.Empty)
-                                        artists += " - ";
+                                    string artists = "";
 
-                                    artists += artist.Name;
+                                    foreach (var artist in Spotify.WebAPI.Status.Item.Artists)
+                                    {
+                                        if (artists != string.Empty)
+                                            artists += " - ";
+
+                                        artists += artist.Name;
+                                    }
+
+                                    ShowMessage("Playing: " + Spotify.WebAPI.Status.Item.Name, "Artists: " + artists, "Album: " + Spotify.WebAPI.Status.Item.Album.Name);
                                 }
-
-                                ShowMessage("Playing: " + Spotify.WebAPI.Status.Item.Name, "Artists: " + artists, "Album: " + Spotify.WebAPI.Status.Item.Album.Name);
+                                else
+                                    ShowMessage((checkBoxMuteAds.Checked ? "Muting" : "Playing") + ": Ads");
                             }
                             else
-                                ShowMessage((checkBoxMuteAds.Checked ? "Muting" : "Playing") + ": Ads");
+                                ShowMessage("Spotify is in pause");
                         }
                         else
-                            ShowMessage("Spotify is in pause");
+                            ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
                     }
                     else
-                        ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
+                        ShowMessage("Error: " + Spotify.WebAPI.Status.Error.Message, "Error: " + Spotify.WebAPI.Status.Error.Message);
                 }
                 else
-                    ShowMessage("Error: " + Spotify.WebAPI.Status.Error.Message, "Error: " + Spotify.WebAPI.Status.Error.Message);
+                {
+                    enable = false; // stop!
+                    MinimizeEZBlocker();
+                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                    CloseEZBlocker(3000);
+                }
             }
             else
-            {
-                enable = false; // stop!
-                MinimizeEZBlocker();
-                notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
-                CloseEZBlocker(3000);
-            }
+                timerStatus.Interval = Spotify.WebAPI.Status.Retry_After;
 
             if (enable)
                 timerStatus.Enabled = true; // go!

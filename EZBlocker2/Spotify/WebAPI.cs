@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
@@ -15,7 +16,7 @@ namespace EZBlocker2.Spotify
 {
     static class WebAPI
     {
-        private static WebClient client = new WebClient();
+        private static CustomWebClient client = new CustomWebClient();
 
         public static string ResponseType { get; } = "code";
         public static string Scope { get; } = "user-read-currently-playing";
@@ -88,7 +89,7 @@ namespace EZBlocker2.Spotify
             catch (WebException ex)
             {
                 if (APIToken != null)
-                    Status = new Status() { Error = ex.Message };
+                    Status = new Status { Error = ex.Message };
 
                 WriteLog(ex);
             }
@@ -104,11 +105,18 @@ namespace EZBlocker2.Spotify
                 if (result != null && result.Length > 0)
                     Status = JsonConvert.DeserializeObject<Status>(Encoding.UTF8.GetString(result));
                 else
-                    Status = new Status() { Is_Private = true };
+                    Status = new Status { Is_Private = true };
             }
             catch (WebException ex)
             {
-                GetToken(true);
+                if (!(ex.Response is HttpWebResponse response && response.StatusCode == (HttpStatusCode)429))
+                {
+                    GetToken(true);
+                    //WriteLog(ex);
+                }
+                else
+                    Status = new Status { Retry_After = Convert.ToInt32(response.Headers.Get("Retry-After") ?? "0") * 1000 };
+
                 WriteLog(ex);
             }
         }
@@ -128,6 +136,7 @@ namespace EZBlocker2.Spotify
                     "refresh_token = " + (APIToken?.Refresh_Token ?? ""),
                     "--------------------------------------------------"
                 };
+                File.OpenWrite(ezBlockerLog).Close();
                 lines.InsertRange(lines.Count, File.ReadAllLines(ezBlockerLog));
                 File.WriteAllLines(ezBlockerLog, lines);
             }

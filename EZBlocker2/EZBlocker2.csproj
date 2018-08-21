@@ -66,6 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Custom\CustomMovement.cs" />
+    <Compile Include="Custom\CustomWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Custom\CustomWebServer.cs" />
     <Compile Include="HostsPatches.cs" />
     <Compile Include="Custom\CustomProfessionalColorTable.cs" />
