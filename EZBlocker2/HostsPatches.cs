@@ -49,18 +49,33 @@
             "www.omaze.com",
         };
 
-        public static readonly string[] wrongHostsPatches = {
-            "googleadapis.l.google.com",
+        public static readonly string[] wrongHostsPatches = {            
+            "adeventtracker.spotify.com",
+            "adnxs.comadplexmedia.adk2x.com",
             "ads.pubmatic.com",
+            "analytics.spotify.com",
+            "audio2.spotify.com",
+            "audio-sp-sto.spotify.com",
             "apresolve.spotify.com",
+            "beta.spotify.map.fastly.net",
+            "crashdump.spotify.com",
+            "desktop.spotify.com",
             "fastly.net",
             "gads.pubmatic.com",
+            "gew1.ap.spotify.com",
+            "googleadapis.l.google.com",
             "googletagmanager.com",
-            "pubads.g.doubleclisck.net",
-            "t.scdn.co",
-            "beta.spotify.map.fastly.net",
+            "log.spotify.com",
+            "lon6-accesspoint-a33.lon6.spotify.com",
             "prod.spotify.map.fastlylb.net",
+            "pubads.g.doubleclisck.net",
+            "spclient.wg.spotify.com",
             "sto3-accesspoint-a88.sto3.spotify.net",
+            "t.scdn.co",
+            "u.scdn.co",
+            "upgrade.scdn.co",
+            "upgrade.spotify.com",
+            "weblb-wg.gslb.spotify.com",
             "www.googletagmanager.com",
             "www.spotify-desktop.com"
         };
