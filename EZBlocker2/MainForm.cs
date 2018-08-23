@@ -685,9 +685,6 @@ namespace EZBlocker2
 
         private void CheckBoxBlockAds_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxBlockAds.Checked)
-                MessageBox.Show("Automatic update for Spotify will be disabled.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-
             try
             {
                 Properties.Settings.Default.BlockAds = checkBoxBlockAds.Checked;
