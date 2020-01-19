@@ -56,6 +56,7 @@ namespace EZBlocker2
             this.imgSong = new System.Windows.Forms.PictureBox();
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.spotifyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.timerStatus = new System.Windows.Forms.Timer(this.components);
@@ -402,6 +403,7 @@ namespace EZBlocker2
             this.contextMenuStrip.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem,
+            this.spotifyToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
             this.contextMenuStrip.ShowImageMargin = false;
@@ -416,6 +418,16 @@ namespace EZBlocker2
             this.openToolStripMenuItem.Size = new System.Drawing.Size(78, 20);
             this.openToolStripMenuItem.Text = "Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
+            // 
+            // spotifyToolStripMenuItem
+            // 
+            this.spotifyToolStripMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.spotifyToolStripMenuItem.ForeColor = System.Drawing.Color.White;
+            this.spotifyToolStripMenuItem.Name = "spotifyToolStripMenuItem";
+            this.spotifyToolStripMenuItem.Padding = new System.Windows.Forms.Padding(0);
+            this.spotifyToolStripMenuItem.Size = new System.Drawing.Size(251, 20);
+            this.spotifyToolStripMenuItem.Text = "Show status";
+            this.spotifyToolStripMenuItem.Click += new System.EventHandler(this.SpotifyToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
@@ -494,6 +506,7 @@ namespace EZBlocker2
         private System.Windows.Forms.CheckBox checkBoxStartMinimized;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem openToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem spotifyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.Label titleLabel;
