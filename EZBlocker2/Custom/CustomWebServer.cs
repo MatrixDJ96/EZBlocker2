@@ -26,7 +26,7 @@ namespace EZBlocker2
             if (!listener.IsListening)
             {
                 listener.Start();
-                Task.Factory.StartNew(GetContext);
+                GetContext();
             }
         }
 
@@ -35,7 +35,6 @@ namespace EZBlocker2
             if (listener.IsListening)
             {
                 listener.Stop();
-                listener.Close();
             }
         }
 
@@ -65,16 +64,15 @@ namespace EZBlocker2
 
                     context.Response.StatusCode = 200;
 
-                    StreamWriter response = new StreamWriter(context.Response.OutputStream);
-
-                    if (error)
-                        response.Write(Properties.Resources.AuthorizationError.Replace("{AUTHORIZE_URL}", Spotify.WebAPI.AuthorizeUrl));
-                    else
-                        response.Write(Properties.Resources.AuthorizationSuccess);
-
-                    response.Close();
+                    using (var response = new StreamWriter(context.Response.OutputStream))
+                    {
+                        if (error)
+                            response.Write(Properties.Resources.AuthorizationError.Replace("{PRODUCT_NAME}", Program.ProductName).Replace("{AUTHORIZE_URL}", Spotify.WebAPI.AuthorizeUrl));
+                        else
+                            response.Write(Properties.Resources.AuthorizationSuccess.Replace("{PRODUCT_NAME}", Program.ProductName));
+                    }
                 }
-                catch { break; }
+                catch { }
             }
             Stop();
         }

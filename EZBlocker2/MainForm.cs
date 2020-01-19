@@ -481,7 +481,7 @@ namespace EZBlocker2
 
             // Start server
             server = new CustomWebServer();
-            server.Start();
+            Task.Run(server.Start);
             
             timerSpotify.Enabled = true;
         }
