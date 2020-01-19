@@ -86,6 +86,7 @@ namespace EZBlocker2
             movement.Exclude(typeof(Button));
             movement.Exclude(typeof(CheckBox));
             movement.Exclude(typeof(LinkLabel));
+
             movement.SetMovement(Controls);
 
             contextMenuStrip.Renderer = new CustomToolStripRenderer();
@@ -112,10 +113,7 @@ namespace EZBlocker2
                 try
                 {
                     string oldEZBlockerLog = ezBlockerLog + ".old";
-
-                    if (File.Exists(oldEZBlockerLog))
-                        File.Delete(oldEZBlockerLog);
-                    
+                    DeleteFile(oldEZBlockerLog);
                     File.Move(ezBlockerLog, oldEZBlockerLog);
                 }
                 catch { }
@@ -258,12 +256,12 @@ namespace EZBlocker2
             RegistryKey startupKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
             foreach (string name in startupKey.GetValueNames())
             {
-                if ((name.ToLower().Contains("ezblocker") && !name.Equals("EZBlocker 2")) || (name.Equals("EZBlocker 2") && !checkBoxStartOnLogin.Checked))
+                if ((name.ToLower().Contains("ezblocker") && !name.Equals(Program.ProductName)) || (name.Equals(Program.ProductName) && !checkBoxStartOnLogin.Checked))
                     startupKey.DeleteValue(name); // Clean
             }
             if (checkBoxStartOnLogin.Checked)
             {
-                string name = "EZBlocker 2";
+                string name = Program.ProductName;
                 var value = startupKey.GetValue(name);
                 if (value == null || !value.Equals(ezBlockerFullExe))
                     startupKey.SetValue(name, ezBlockerFullExe);
@@ -375,15 +373,15 @@ namespace EZBlocker2
                 if (fix || write)
                 {
                     File.WriteAllLines(hostsFullFile, newLines);
-                    MessageBox.Show("Hosts file has been " + (fix ? "fixed" : "updated") + " successfully!", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Hosts file has been " + (fix ? "fixed" : "updated") + " successfully!", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch
             {
                 if (!IsAdmin)
                 {
-                    string text = (loading ? "An error has been found while checking hosts file...\r\nTo solve this problem" : "To " + (checkBoxBlockAds.Checked ? "enable" : "disable") + " this option") + " administrator rights are required.\r\n\r\nDo you want to restart EZBlocker 2 in admin mode?";
-                    if (MessageBox.Show(text, "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes && RestartEZBlocker(true))
+                    string text = (loading ? "An error has been found while checking hosts file...\r\nTo solve this problem" : "To " + (checkBoxBlockAds.Checked ? "enable" : "disable") + " this option") + " administrator rights are required.\r\n\r\nDo you want to restart " + Program.ProductName + " in admin mode?";
+                    if (MessageBox.Show(text, Program.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes && RestartEZBlocker(true))
                         return true;
                     else
                         return false;
@@ -399,7 +397,7 @@ namespace EZBlocker2
                     }
                     else
                     {
-                        MessageBox.Show("An error has been found while checking hosts file...\r\nEZBlocker 2 is unable to resolve this problem...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show("An error has been found while checking hosts file...\r\n" + Program.ProductName + " is unable to resolve this problem...", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }
                 }
@@ -430,7 +428,7 @@ namespace EZBlocker2
 
             if (spotifyNotInstalled)
             {
-                MessageBox.Show("Spotify seems not to be installed on your system.\r\nEZBlocker 2 is useless for you...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Spotify seems not to be installed on your system.\r\n" + Program.ProductName + " is useless for you...", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 KillEZBlocker();
             }
             else if (!IsSpotifyRunning())
@@ -464,10 +462,10 @@ namespace EZBlocker2
             catch
             {
                 if (IsAdmin)
-                    MessageBox.Show("Error while extracting dependencies!\r\nEZBlocker 2 will be closed immediately", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error while extracting dependencies!\r\n" + Program.ProductName + " will be closed immediately", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 else
                 {
-                    if (MessageBox.Show("Error while extracting dependencies...\r\nDo you want to retry in admin mode?", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                    if (MessageBox.Show("Error while extracting dependencies...\r\nDo you want to retry in admin mode?", Program.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                         RestartEZBlocker(true);
                 }
                 KillEZBlocker();
@@ -549,9 +547,11 @@ namespace EZBlocker2
 
                 try
                 {
-                    if (processTmp != null && !processTmp.HasExited)
+                    if (processTmp != null)
                     {
-                        processTmp.Kill();
+                        if (!processTmp.HasExited)
+                            processTmp.Kill();
+
                         processTmp = null;
                     }
                 }
@@ -600,7 +600,7 @@ namespace EZBlocker2
                                 ShowMessage("Spotify is in pause");
                         }
                         else
-                            ShowMessage("Spotify is in private session", "Disable private session to allow EZBlocker 2 to work");
+                            ShowMessage("Spotify is in private session", "Disable private session to allow " + Program.ProductName + " to work");
                     }
                     else
                         ShowMessage("Error: " + Spotify.WebAPI.Status.Error.Message, "Error: " + Spotify.WebAPI.Status.Error.Message);
@@ -609,7 +609,7 @@ namespace EZBlocker2
                 {
                     enable = false; // stop!
                     MinimizeEZBlocker();
-                    notifyIcon.ShowBalloonTip(3000, "EZBlocker 2", "Exiting from EZBlocker 2...", ToolTipIcon.Info);
+                    notifyIcon.ShowBalloonTip(3000, Program.ProductName, "Exiting from " + Program.ProductName + "...", ToolTipIcon.Info);
                     CloseEZBlocker(3000);
                 }
             }
@@ -624,7 +624,7 @@ namespace EZBlocker2
         {
             if (e.KeyCode == Keys.ControlKey)
             {
-                if (MessageBox.Show("Do you want to move EZBlocker in the middle of the screen?", "EZBlocker 2", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Do you want to move " + Program.ProductName + " in the middle of the screen?", Program.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     Location = centerLocation;
                     SaveLocation();
@@ -652,7 +652,7 @@ namespace EZBlocker2
             else if (File.Exists(sndVol32FullExe))
                 StartProcess(sndVol32FullExe, "-m " + l.ToString());
             else
-                MessageBox.Show("Could not open system volume mixer.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Could not open system volume mixer.", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void BtnSndVol_MouseLeave(object sender, EventArgs e) => btnSndVol.BackgroundImage = Properties.Resources.SndVol_Leave;
@@ -692,7 +692,7 @@ namespace EZBlocker2
 
                 if (BlockAds())
                 {
-                    MessageBox.Show("It could be necessary to restart Spotify or your computer for this changes to take effect.", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("It could be necessary to restart Spotify or your computer for this changes to take effect.", Program.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Properties.Settings.Default.Save();
                 }
                 else

@@ -49,7 +49,7 @@
             "www.omaze.com",
         };
 
-        public static readonly string[] wrongHostsPatches = {            
+        public static readonly string[] wrongHostsPatches = {
             "adeventtracker.spotify.com",
             "adnxs.comadplexmedia.adk2x.com",
             "ads.pubmatic.com",

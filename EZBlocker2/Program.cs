@@ -18,6 +18,8 @@ namespace EZBlocker2
         public static Mutex mutex = null;
         public static string mutexName;
 
+        public static string ProductName { get; } = ((AssemblyProductAttribute)(Assembly.GetExecutingAssembly().GetCustomAttribute(typeof(AssemblyProductAttribute)))).Product;
+
         // EZBlocker 2
         public static readonly string ezBlockerFullExe = Application.ExecutablePath.Replace("/", "\\");
         public static readonly string ezBlockerExe = Path.GetFileName(ezBlockerFullExe);
@@ -180,10 +182,10 @@ namespace EZBlocker2
                     Application.Run(new MainForm());
                 }
                 else
-                    MessageBox.Show("There is already another instance running!", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("There is already another instance running!", ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
-                MessageBox.Show(".NET Framework 4.5 is required to run EZBlocker 2...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(".NET Framework 4.5 is required to run EZBlocker 2...", ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

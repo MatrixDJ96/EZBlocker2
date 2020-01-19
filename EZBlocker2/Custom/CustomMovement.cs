@@ -12,7 +12,7 @@ namespace EZBlocker2
         private bool dragging = false;
         private Size cursorPosition;
         private Point formPosition;
-        
+
         public event Action NewPosition;
 
         public CustomMovement(Form form) => this.form = form;

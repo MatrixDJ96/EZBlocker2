@@ -31,7 +31,7 @@ namespace EZBlocker2.Spotify.JSON
 
         public bool Is_Private { get; set; } = false;
         public bool Is_Ads { get => Item == null; }
-        
+
         public int Retry_After { get; set; } = 0;
     }
 }
