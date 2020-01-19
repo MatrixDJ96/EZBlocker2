@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using NAudio.CoreAudioApi;
 using System;
 using System.Collections.Generic;
@@ -545,6 +545,8 @@ namespace EZBlocker2
         {
             if (Spotify.WebAPI.APIToken != null)
             {
+                timerStatus.Enabled = false; // wait...
+
                 try
                 {
                     if (processTmp != null && !processTmp.HasExited)
@@ -555,7 +557,6 @@ namespace EZBlocker2
                 }
                 catch { }
                 
-                timerStatus.Enabled = false; // wait...
                 Spotify.WebAPI.GetStatus();
             }
         }
@@ -566,7 +567,7 @@ namespace EZBlocker2
             
             if (Spotify.WebAPI.Status.Retry_After == 0)
             {
-                timerStatus.Interval = 300;
+                timerStatus.Interval = 500; // 0.5s
 
                 if (IsSpotifyRunning())
                 {
