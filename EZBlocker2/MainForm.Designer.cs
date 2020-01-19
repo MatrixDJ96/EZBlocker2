@@ -436,7 +436,7 @@ namespace EZBlocker2
             // 
             // timerStatus
             // 
-            this.timerStatus.Interval = 300;
+            this.timerStatus.Interval = 500;
             this.timerStatus.Tick += new System.EventHandler(this.TimerStatus_Tick);
             // 
             // timerSpotify
