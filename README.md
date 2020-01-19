@@ -53,6 +53,13 @@ EZBlocker 2 will create a log with all errors detected. If you want to open a is
 
 ### Changelog
 
+Version 2.1.4.0:
+- Changed request interval to 500ms
+- Updated resources using NuGet
+- Improved authorization process
+- Updated Spotify Web API (issue #19, #20, #24, #28)
+- Added menu item to show EZBlocker 2 status
+
 Version 2.1.3.4:
 - Fixed log
 - Added browser auto-close
