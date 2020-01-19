@@ -746,6 +746,19 @@ namespace EZBlocker2
 
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e) => ShowEZBlocker();
 
+        private void SpotifyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string text = message[0];
+
+            if (!string.IsNullOrWhiteSpace(message[1]))
+                text += "\r\n" + message[1];
+
+            if (!string.IsNullOrWhiteSpace(message[2]))
+                text += "\r\n" + message[2];
+
+            notifyIcon.ShowBalloonTip(3000, Program.ProductName, text, ToolTipIcon.Info);
+        }
+
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e) => CloseEZBlocker();
     }
 }
