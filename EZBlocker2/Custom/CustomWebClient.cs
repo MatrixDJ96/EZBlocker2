@@ -20,7 +20,7 @@ namespace EZBlocker2
                 CancelAsync();
             });
         }
-        
+
         protected override WebRequest GetWebRequest(Uri address)
         {
             WebRequest request = base.GetWebRequest(address);

@@ -55,7 +55,7 @@ namespace EZBlocker2
             }
             catch
             {
-                MessageBox.Show("Error while reading settings...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error while reading settings...", ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw new Exception();
             }
 
@@ -101,7 +101,7 @@ namespace EZBlocker2
             }
             catch
             {
-                MessageBox.Show("Error while saving settings...", "EZBlocker 2", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error while saving settings...", ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw new Exception();
             }
         }
