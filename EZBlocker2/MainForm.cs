@@ -520,7 +520,7 @@ namespace EZBlocker2
 
                 ShowMessage("Hooking to Spotify...");
 
-                Spotify.WebAPI.NewStatus += Main_Status;
+                Spotify.WebAPI.OnNewStatus += Main_Status;
                 Spotify.WebAPI.RedirectUri = Uri.EscapeUriString(server.Prefix);
 
                 NameValueCollection data = HttpUtility.ParseQueryString(string.Empty);
