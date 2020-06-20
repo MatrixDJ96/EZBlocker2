@@ -20,14 +20,20 @@ namespace EZBlocker2.Spotify
 
         public static string ResponseType { get; } = "code";
         public static string Scope { get; } = "user-read-currently-playing";
-        public static string ClientID { get; } = "b6058737c9a048ea88a7282b25374c2c";
+        public static string ClientID { get; } = Properties.Settings.Default.ClientId;
+        public static string ClientSecret { get; } = Properties.Settings.Default.ClientSecret;
 
         public static string RedirectUri { get; set; }
 
         public static string TokenContentType { get; } = "application/x-www-form-urlencoded";
         public static string StatusContentType { get; } = "application/json";
 
-        public static string Authorization { get; } = "Basic YjYwNTg3MzdjOWEwNDhlYTg4YTcyODJiMjUzNzRjMmM6NzIyMDMzZDA4YTk0NGU2MmI1ODI2ZjFhOTkzNzczNTg=";
+        public static string Authorization { get; } =
+            "Basic " +
+            System.Convert.ToBase64String(
+                System.Text.Encoding.GetEncoding("ISO-8859-1")
+                    .GetBytes(ClientID + ":" + ClientSecret)
+            );
 
         public static string AuthorizeUrl { get; set; }
         public static string APIUrl { get; } = "https://accounts.spotify.com/api/token";

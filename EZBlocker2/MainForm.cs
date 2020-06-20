@@ -103,6 +103,9 @@ namespace EZBlocker2
 
             if (Properties.Settings.Default.StartMinimized)
                 HideEZBlocker();
+
+            // Create .ini config file on first startup so the user can modify Client Id+Secret
+            Properties.Settings.Default.Save();
         }
 
         /* Callable functions */
