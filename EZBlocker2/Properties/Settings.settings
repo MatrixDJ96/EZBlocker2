@@ -21,10 +21,10 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ClientId" Type="System.String" Scope="User">
-      <Value Profile="(Default)">b6058737c9a048ea88a7282b25374c2c</Value>
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="ClientSecret" Type="System.String" Scope="User">
-      <Value Profile="(Default)">722033d08a944e62b5826f1a99377358</Value>
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>
