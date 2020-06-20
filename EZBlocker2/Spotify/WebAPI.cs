@@ -28,12 +28,17 @@ namespace EZBlocker2.Spotify
         public static string TokenContentType { get; } = "application/x-www-form-urlencoded";
         public static string StatusContentType { get; } = "application/json";
 
-        public static string Authorization { get; } =
-            "Basic " +
-            System.Convert.ToBase64String(
-                System.Text.Encoding.GetEncoding("ISO-8859-1")
-                    .GetBytes(ClientID + ":" + ClientSecret)
-            );
+        public static string Authorization {
+            get  =>
+            {
+				if (!string.IsNullOrWhiteSpace(ClientID) && !string.IsNullOrWhiteSpace(ClientSecret))
+				{
+					return "Basic " + System.Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(ClientID + ":" + ClientSecret));
+				}
+				
+				return "Basic YjYwNTg3MzdjOWEwNDhlYTg4YTcyODJiMjUzNzRjMmM6NzIyMDMzZDA4YTk0NGU2MmI1ODI2ZjFhOTkzNzczNTg=";
+            }
+        }
 
         public static string AuthorizeUrl { get; set; }
         public static string APIUrl { get; } = "https://accounts.spotify.com/api/token";
