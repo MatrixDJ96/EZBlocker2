@@ -17,6 +17,8 @@ You could choose 2 different options:
 <b>No setup required, it's a portable application!</b><br>
 To update your EZBlocker 2, replace the executable or use <b>auto-update</b> process.<br>
 
+No Google Analytics included
+
 #
 
 ### How it works
