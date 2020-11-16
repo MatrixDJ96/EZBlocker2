@@ -760,5 +760,16 @@ namespace EZBlocker2
         }
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e) => CloseEZBlocker();
+
+        private void CheckBoxPlayAudioWhenMuted_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CheckBoxLoopAudio_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
+}
 }
