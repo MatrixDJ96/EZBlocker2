@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using NAudio.CoreAudioApi;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -58,6 +59,10 @@ namespace EZBlocker2
         private bool execSpotify = false;
         private bool exiting = false;
 
+        // Break audio playback
+        private WaveOutEvent outputDevice;
+        private AudioFileReader audioFile;
+
         // Label message
         private string[] message = { "", "", "" }; // useful to store info
         private Process processTmp;
@@ -103,6 +108,8 @@ namespace EZBlocker2
 
             if (Properties.Settings.Default.StartMinimized)
                 HideEZBlocker();
+
+            // TODO: LoadAudio() from config
         }
 
         /* Callable functions */
@@ -232,11 +239,23 @@ namespace EZBlocker2
 
         private void Mute(bool enable)
         {
+            // update break audio playback state
+            if (enable)
+            {
+                if (checkBoxPlayAudioWhenMuted.Checked)
+                    StartAudio();
+                else
+                    StopAudio();
+            }
+            else
+                StopAudio();
+
             if (muted == enable)
                 return;
 
             muted = enable;
 
+            // set Spotify's mute state
             using (var enumerator = new MMDeviceEnumerator())
             {
                 using (var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia))
@@ -403,6 +422,61 @@ namespace EZBlocker2
                 }
             }
             return true;
+        }
+
+        // fork change: craeted to consider simulated ad break for testing
+        private bool AdsPlaying()
+        {
+            return Spotify.WebAPI.Status.Is_Ads || checkBoxSimulateAdBreak.Checked;
+        }
+
+        private void InitAudioPlayer()
+        {
+            outputDevice?.Dispose();
+            outputDevice = new WaveOutEvent();
+        }
+
+        private void StartAudio()
+        {
+            if (audioFile == null ||
+                outputDevice?.PlaybackState == PlaybackState.Playing)
+                return;
+
+            InitAudioPlayer();
+            outputDevice.Init(audioFile);
+            outputDevice.PlaybackStopped += OnPlaybackStopped;
+            outputDevice.Play();
+        }
+
+        private void StopAudio()
+        {
+            if (outputDevice == null) return;
+            if(outputDevice.PlaybackState == PlaybackState.Playing)
+            {
+                outputDevice.Stop();
+                outputDevice.Dispose();
+                if(audioFile != null)
+                    audioFile.Position = 0;
+            }
+        }
+
+        private void LoadAudio(OpenFileDialog fd)
+        {
+            AudioFileReader newAudioFile;
+            try
+            {
+                newAudioFile = new AudioFileReader(fd.FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open the specified file. Please check that it is a supported audio file.", "Cannot open file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            audioFile?.Dispose();
+            audioFile = newAudioFile;
+            labelAudioFile.Text = fd.SafeFileName;
+            // TODO: save audioFile preference
         }
 
         /* Functions executed by events */
@@ -577,9 +651,9 @@ namespace EZBlocker2
                         {
                             if (Spotify.WebAPI.Status.Is_Playing)
                             {
-                                Mute(Spotify.WebAPI.Status.Is_Ads && checkBoxMuteAds.Checked);
+                                Mute(AdsPlaying() && checkBoxMuteAds.Checked);
 
-                                if (!Spotify.WebAPI.Status.Is_Ads)
+                                if (!AdsPlaying())
                                 {
                                     string artists = "";
 
@@ -594,7 +668,9 @@ namespace EZBlocker2
                                     ShowMessage("Playing: " + Spotify.WebAPI.Status.Item.Name, "Artists: " + artists, "Album: " + Spotify.WebAPI.Status.Item.Album.Name);
                                 }
                                 else
-                                    ShowMessage((checkBoxMuteAds.Checked ? "Muting" : "Playing") + ": Ads");
+                                {
+                                    ShowMessage((checkBoxSimulateAdBreak.Checked ? "[Simulating ad break]\n" : "") + (checkBoxMuteAds.Checked ? "Muting" : "Playing") + ": Ads");
+                                }
                             }
                             else
                                 ShowMessage("Spotify is in pause");
@@ -632,6 +708,18 @@ namespace EZBlocker2
             }
         }
 
+        private void OnPlaybackStopped(object sender, StoppedEventArgs args)
+        {
+            if(AdsPlaying() && 
+                checkBoxPlayAudioWhenMuted.Checked &&
+                checkBoxLoopAudio.Checked)
+            {
+                var curPlayer = (WaveOutEvent)sender;
+                audioFile.Position = 0;
+                curPlayer.Init(audioFile);
+                curPlayer.Play();
+            }
+        }
         private void BtnMinimize_Click(object sender, EventArgs e) => MinimizeEZBlocker();
 
         private void BtnReportIssue_Click(object sender, EventArgs e) => StartProcess(issue_website);
@@ -770,6 +858,28 @@ namespace EZBlocker2
         {
 
         }
+
+        private void ButtonLoadAudio_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog fileDialog = new OpenFileDialog())
+            {
+                fileDialog.InitialDirectory = audioFile != null ? audioFile.FileName : "c:\\";
+                fileDialog.Filter = "Common audio types (*.wav;*.mp3;*.aiff)|*.wav;*.mp3;*.aiff|All files (*.*)|*.*";
+                fileDialog.FilterIndex = 1;
+                //fileDialog.RestoreDirectory = true;
+
+                if (fileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    LoadAudio(fileDialog);
+                }
+            }
+
+        }
+
+        private void CheckBoxSimulateAdBreak(object sender, EventArgs e)
+        {
+            var cb = (CheckBox)sender;
+            cb.ForeColor = cb.Checked ? Color.FromArgb(200, 0, 0) : Color.White;
+        }
     }
-}
 }
