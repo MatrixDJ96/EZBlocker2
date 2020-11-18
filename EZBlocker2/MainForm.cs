@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -30,7 +31,7 @@ namespace EZBlocker2
 
         // Classic Spotify files
         private readonly string spotifyFullExe = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
-        
+
         // Current SessionId
         private readonly int currentSessionId = Process.GetCurrentProcess().SessionId;
 
@@ -42,10 +43,19 @@ namespace EZBlocker2
 
         // WebServer
         private CustomWebServer server = null;
-        
+
         // Form movement and location
-        private CustomMovement movement;
+        //private CustomMovement movement;
         private Point centerLocation;
+
+        // Form movement
+        public const int WM_NCLBUTTONDOWN = 0xA1;
+        public const int HT_CAPTION = 0x2;
+
+        [DllImportAttribute("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        [DllImportAttribute("user32.dll")]
+        public static extern bool ReleaseCapture();
 
         // Spotify system volume variable
         private bool muted = false;
@@ -83,16 +93,16 @@ namespace EZBlocker2
             }
 
             // set keydown event
-            SetCustomEvent(Controls);
+            //SetCustomEvent(Controls);
 
-            movement = new CustomMovement(this);
-            movement.NewPosition += SaveLocation;
+            //movement = new CustomMovement(this);
+            //movement.NewPosition += SaveLocation;
 
-            movement.Exclude(typeof(Button));
-            movement.Exclude(typeof(CheckBox));
-            movement.Exclude(typeof(LinkLabel));
+            //movement.Exclude(typeof(Button));
+            //movement.Exclude(typeof(CheckBox));
+            //movement.Exclude(typeof(LinkLabel));
 
-            movement.SetMovement(Controls);
+            //movement.SetMovement(Controls);
 
             contextMenuStrip.Renderer = new CustomToolStripRenderer();
 
@@ -108,8 +118,6 @@ namespace EZBlocker2
 
             if (Properties.Settings.Default.StartMinimized)
                 HideEZBlocker();
-
-            // TODO: LoadAudio() from config
         }
 
         /* Callable functions */
@@ -147,6 +155,17 @@ namespace EZBlocker2
             {
                 Properties.Settings.Default.PositionX = Location.X.ToString();
                 Properties.Settings.Default.PositionY = Location.Y.ToString();
+                Properties.Settings.Default.Save();
+            }
+            catch { }
+        }
+
+        private void SaveAudio()
+        {
+            try
+            {
+                if (audioFile != null)
+                    Properties.Settings.Default.BreakAudio = audioFile.FileName;
                 Properties.Settings.Default.Save();
             }
             catch { }
@@ -208,7 +227,7 @@ namespace EZBlocker2
         private bool IsSpotifyRunning()
         {
             Process[] processes = Process.GetProcessesByName("spotify");
-            Process[] processesCurrentSessionId = processes.Where(x => x.SessionId == currentSessionId).ToArray();            
+            Process[] processesCurrentSessionId = processes.Where(x => x.SessionId == currentSessionId).ToArray();
             return processesCurrentSessionId.Length > 0 ? true : false;
         }
 
@@ -434,6 +453,7 @@ namespace EZBlocker2
         {
             outputDevice?.Dispose();
             outputDevice = new WaveOutEvent();
+            SetVolume(Properties.Settings.Default.AudioVolume);
         }
 
         private void StartAudio()
@@ -451,32 +471,43 @@ namespace EZBlocker2
         private void StopAudio()
         {
             if (outputDevice == null) return;
-            if(outputDevice.PlaybackState == PlaybackState.Playing)
+            if (outputDevice.PlaybackState == PlaybackState.Playing)
             {
                 outputDevice.Stop();
                 outputDevice.Dispose();
-                if(audioFile != null)
+                if (audioFile != null)
                     audioFile.Position = 0;
             }
         }
 
-        private void LoadAudio(OpenFileDialog fd)
+        private void LoadAudio(String path = "")
         {
+            if (path == "" || !File.Exists(path))
+                return;
+
             AudioFileReader newAudioFile;
             try
             {
-                newAudioFile = new AudioFileReader(fd.FileName);
+                newAudioFile = new AudioFileReader(path);
             }
-            catch (Exception ex)
+            catch (Exception _)
             {
-                MessageBox.Show("Could not open the specified file. Please check that it is a supported audio file.", "Cannot open file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Could not open the specified file. Please check that it is a supported audio file.", "Error loading ad break audio", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             audioFile?.Dispose();
             audioFile = newAudioFile;
-            labelAudioFile.Text = fd.SafeFileName;
-            // TODO: save audioFile preference
+            labelAudioFile.Text = Path.GetFileName(path);
+            SaveAudio();
+        }
+
+        private void SetVolume(float newVol)
+        {
+            float vol = (float)trackBarVolume.Value / trackBarVolume.Maximum;
+            Properties.Settings.Default.AudioVolume = vol;
+            if (outputDevice != null)
+                outputDevice.Volume = vol;
         }
 
         /* Functions executed by events */
@@ -507,12 +538,16 @@ namespace EZBlocker2
             }
             else if (!IsSpotifyRunning())
                 execSpotify = true; // Start Spotify
-            
+
             // Load settings
             checkBoxMuteAds.Checked = Properties.Settings.Default.MuteAds;
             checkBoxBlockAds.Checked = Properties.Settings.Default.BlockAds;
             checkBoxStartOnLogin.Checked = Properties.Settings.Default.StartOnLogin;
             checkBoxStartMinimized.Checked = Properties.Settings.Default.StartMinimized;
+            checkBoxPlayAudioWhenMuted.Checked = Properties.Settings.Default.AudioInsteadOfMute;
+            checkBoxLoopAudio.Checked = Properties.Settings.Default.LoopAudio;
+            LoadAudio(Properties.Settings.Default.BreakAudio);
+            SetVolume(Properties.Settings.Default.AudioVolume);
 
             bool enableBlockAds = BlockAds(true);
             StartOnLogin();
@@ -556,7 +591,7 @@ namespace EZBlocker2
             // Start server
             server = new CustomWebServer();
             Task.Run(server.Start);
-            
+
             timerSpotify.Enabled = true;
         }
 
@@ -630,15 +665,15 @@ namespace EZBlocker2
                     }
                 }
                 catch { }
-                
+
                 Spotify.WebAPI.GetStatus();
             }
         }
-        
+
         private void Main_Status()
         {
             bool enable = true; // start?
-            
+
             if (Spotify.WebAPI.Status.Retry_After == 0)
             {
                 timerStatus.Interval = 500; // 0.5s
@@ -695,7 +730,7 @@ namespace EZBlocker2
             if (enable)
                 timerStatus.Enabled = true; // go!
         }
-                
+
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.ControlKey)
@@ -710,7 +745,7 @@ namespace EZBlocker2
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs args)
         {
-            if(AdsPlaying() && 
+            if (AdsPlaying() &&
                 checkBoxPlayAudioWhenMuted.Checked &&
                 checkBoxLoopAudio.Checked)
             {
@@ -851,12 +886,34 @@ namespace EZBlocker2
 
         private void CheckBoxPlayAudioWhenMuted_CheckedChanged(object sender, EventArgs e)
         {
-
+            try
+            {
+                Properties.Settings.Default.AudioInsteadOfMute = checkBoxPlayAudioWhenMuted.Checked;
+                Properties.Settings.Default.Save();
+            }
+            catch
+            {
+                Properties.Settings.Default.AudioInsteadOfMute = !checkBoxPlayAudioWhenMuted.Checked;
+                checkBoxPlayAudioWhenMuted.CheckedChanged -= new EventHandler(CheckBoxPlayAudioWhenMuted_CheckedChanged);
+                checkBoxPlayAudioWhenMuted.Checked = Properties.Settings.Default.AudioInsteadOfMute;
+                checkBoxPlayAudioWhenMuted.CheckedChanged += new EventHandler(CheckBoxPlayAudioWhenMuted_CheckedChanged);
+            }
         }
 
         private void CheckBoxLoopAudio_CheckedChanged(object sender, EventArgs e)
         {
-
+            try
+            {
+                Properties.Settings.Default.LoopAudio = checkBoxLoopAudio.Checked;
+                Properties.Settings.Default.Save();
+            }
+            catch
+            {
+                Properties.Settings.Default.LoopAudio = !checkBoxLoopAudio.Checked;
+                checkBoxLoopAudio.CheckedChanged -= new EventHandler(CheckBoxLoopAudio_CheckedChanged);
+                checkBoxLoopAudio.Checked = Properties.Settings.Default.LoopAudio;
+                checkBoxLoopAudio.CheckedChanged += new EventHandler(CheckBoxLoopAudio_CheckedChanged);
+            }
         }
 
         private void ButtonLoadAudio_Click(object sender, EventArgs e)
@@ -870,7 +927,7 @@ namespace EZBlocker2
 
                 if (fileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    LoadAudio(fileDialog);
+                    LoadAudio(fileDialog.FileName);
                 }
             }
 
@@ -880,6 +937,25 @@ namespace EZBlocker2
         {
             var cb = (CheckBox)sender;
             cb.ForeColor = cb.Checked ? Color.FromArgb(200, 0, 0) : Color.White;
+        }
+
+        private void WindowMoveZone_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
+            }
+        }
+
+        private void TrackBarVolume_Scroll(object sender, EventArgs e)
+        {
+            SetVolume(Properties.Settings.Default.AudioVolume);
+        }
+
+        private void TrackBarVolume_MouseUp(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Save();
         }
     }
 }
